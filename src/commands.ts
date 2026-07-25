@@ -36,7 +36,7 @@ export const playerCommands: readonly PlayerCommandSpec[] = [
   {
     id: "previous",
     keys: [",", "<"],
-    keyLabel: "<",
+    keyLabel: ",",
     label: "previous",
     command: (projection) => {
       const args = playerArgs(projection);
@@ -46,7 +46,7 @@ export const playerCommands: readonly PlayerCommandSpec[] = [
   {
     id: "next",
     keys: [".", ">"],
-    keyLabel: ">",
+    keyLabel: ".",
     label: "next",
     command: (projection) => {
       const args = playerArgs(projection);
@@ -66,7 +66,7 @@ export const playerCommands: readonly PlayerCommandSpec[] = [
   {
     id: "volume-up",
     keys: ["+", "="],
-    keyLabel: "+",
+    keyLabel: "=",
     label: "volumeUp",
     command: (projection) => {
       const args = playerArgs(projection);
@@ -91,10 +91,24 @@ export const playerCommands: readonly PlayerCommandSpec[] = [
 ];
 
 export const playerCommandForKey = (
-  key: KeyEvent,
+  key: Pick<KeyEvent, "name" | "sequence">,
   projection: PlayerProjection,
 ) => {
-  const value = key.name === "space" ? "space" : key.sequence;
+  const namedValue = (() => {
+    switch (key.name) {
+      case "space":
+        return "space";
+      case "comma":
+        return ",";
+      case "period":
+        return ".";
+      case "equal":
+        return "=";
+      case "minus":
+        return "-";
+    }
+  })();
+  const value = key.name === "space" ? "space" : key.sequence || namedValue;
   return playerCommands
     .find((command) =>
       value === undefined ? false : command.keys.includes(value),
