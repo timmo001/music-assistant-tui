@@ -93,3 +93,30 @@ test("collects connection settings during first-run setup", async () => {
     renderer.destroy();
   }
 });
+
+test("routes Ctrl+C through graceful app shutdown", async () => {
+  const { renderer, mockInput } = await createTestRenderer({
+    width: 80,
+    height: 24,
+  });
+  let quit = false;
+  try {
+    new App(
+      renderer,
+      DEFAULT_THEME,
+      en,
+      buildMenu(en),
+      "player",
+      undefined,
+      () => {
+        quit = true;
+      },
+    );
+
+    mockInput.pressCtrlC();
+
+    expect(quit).toBe(true);
+  } finally {
+    renderer.destroy();
+  }
+});

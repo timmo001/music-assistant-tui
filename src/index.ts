@@ -40,7 +40,7 @@ if (flags.help) {
         Effect.promise(() =>
           createCliRenderer({
             screenMode: "alternate-screen",
-            exitOnCtrlC: true,
+            exitOnCtrlC: false,
             useMouse: false,
             backgroundColor: theme.bg,
           }),

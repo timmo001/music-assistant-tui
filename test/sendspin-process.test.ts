@@ -75,4 +75,42 @@ while :; do sleep 1; done
       "40",
     ]);
   });
+
+  test("stops the child when its scope closes", async () => {
+    const root = await mkdtemp(join(tmpdir(), "ma-tui-sendspin-"));
+    directories.push(root);
+    const fixture = join(root, "sendspin-rs-cli");
+    await writeFile(
+      fixture,
+      `#!/bin/sh
+if [ "$1" = "--version" ]; then
+  printf 'sendspin-rs-cli 0.0.8\\n'
+  exit 0
+fi
+trap 'exit 0' TERM
+while :; do sleep 1; done
+`,
+    );
+    await chmod(fixture, 0o755);
+
+    const pid = await Effect.runPromise(
+      Effect.scoped(
+        Effect.gen(function* () {
+          const service = yield* SendspinProcess.make(fixture, root);
+          yield* service.start({
+            serverUrl: "http://127.0.0.1:8095",
+            playerId: "player-id",
+            playerName: "Terminal",
+            volume: 40,
+          });
+          const status = yield* SubscriptionRef.get(service.status);
+          if (status.type !== "running")
+            throw new Error("fixture did not start");
+          return status.pid;
+        }),
+      ),
+    );
+
+    expect(() => process.kill(pid, 0)).toThrow();
+  });
 });

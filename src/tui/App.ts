@@ -55,6 +55,10 @@ export class App {
   }
 
   private handleKeyPress(key: KeyEvent): void {
+    if (key.ctrl && key.name === "c") {
+      this.onQuit?.();
+      return;
+    }
     if (this.activeView === "setup") {
       this.setup.handleKeyPress(key);
       return;
