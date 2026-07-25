@@ -102,7 +102,7 @@ depends = ["install", "sendspin:download"]
 run = '''
 rm -rf build
 bun run build
-VERSION="$(git describe --long --tags --abbrev=7 2>/dev/null || printf '0.1.0.r%s.g%s' "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)")"
+VERSION="$(git describe --long --tags --abbrev=7 2>/dev/null || printf '%s.0.r%s.g%s' "$(git log -1 --format=%cd --date=format:%Y%m%d)" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)")"
 VERSION="$(printf '%s' "$VERSION" | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g')"
 export VERSION
 ./.scripts/linux/create-arch.sh

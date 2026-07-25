@@ -11,7 +11,7 @@ pkgver="$(
     | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
 )"
 if [[ -z $pkgver ]]; then
-  pkgver="0.1.0.r$(git rev-list --count HEAD).g$(git rev-parse --short=7 HEAD)"
+  pkgver="$(git log -1 --format=%cd --date=format:%Y%m%d).0.r$(git rev-list --count HEAD).g$(git rev-parse --short=7 HEAD)"
 fi
 
 mkdir -p "$output_dir"
