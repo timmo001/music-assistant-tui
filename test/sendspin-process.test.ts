@@ -14,10 +14,14 @@ afterEach(async () => {
 });
 
 describe("Sendspin process", () => {
-  test("resolves the downloaded development helper", async () => {
-    expect(await SendspinProcess.resolveBinary()).toBe(
-      join(process.cwd(), "dist", "sendspin-rs-cli"),
-    );
+  test("resolves a configured helper", async () => {
+    const root = await mkdtemp(join(tmpdir(), "ma-tui-sendspin-"));
+    directories.push(root);
+    const fixture = join(root, "sendspin-rs-cli");
+    await writeFile(fixture, "#!/bin/sh\n");
+    await chmod(fixture, 0o755);
+
+    expect(await SendspinProcess.resolveBinary(fixture)).toBe(fixture);
   });
 
   test("passes playback configuration and owns child shutdown", async () => {
