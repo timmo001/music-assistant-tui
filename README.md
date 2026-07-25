@@ -24,5 +24,3 @@ The standalone binary is written to `dist/music-assistant-tui`.
 ## Packages
 
 Stable `YYYYMMDD.X` releases produce Linux x86_64 and aarch64 archives, debs, RPMs, checksums, and the AUR package `music-assistant-tui`. Every push to `main` publishes `music-assistant-tui-git`.
-
-This project was initially adapted from `home-assistant-tui` and retains only its generic terminal UI and packaging patterns.
