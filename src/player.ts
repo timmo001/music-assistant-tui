@@ -18,14 +18,19 @@ export interface PlayerProjection {
   readonly duration?: number | null;
 }
 
+const universalPlayerId = (playerId: string) =>
+  `up${playerId.replaceAll(/[:_-]/g, "").toLowerCase()}`;
+
 export const projectPlayer = (
   snapshot: MusicAssistantSnapshot,
   process: ProcessStatus,
   playerId: string,
   nowSeconds = Date.now() / 1000,
 ): PlayerProjection => {
-  const player = snapshot.players.get(playerId);
-  const queue = snapshot.queues.get(playerId);
+  const player =
+    snapshot.players.get(playerId) ??
+    snapshot.players.get(universalPlayerId(playerId));
+  const queue = snapshot.queues.get(player?.player_id ?? playerId);
   const media = player?.current_media;
   const item = queue?.current_item;
   return {

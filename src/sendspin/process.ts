@@ -66,6 +66,7 @@ export const resolveBinary = async (configured?: string): Promise<string> => {
   const candidates = [
     configured,
     "/usr/lib/music-assistant-tui/sendspin-rs-cli",
+    join(process.cwd(), "dist", "sendspin-rs-cli"),
     "sendspin-rs-cli",
   ].filter((candidate): candidate is string => candidate !== undefined);
   for (const candidate of candidates) {

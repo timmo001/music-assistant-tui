@@ -14,6 +14,12 @@ afterEach(async () => {
 });
 
 describe("Sendspin process", () => {
+  test("resolves the downloaded development helper", async () => {
+    expect(await SendspinProcess.resolveBinary()).toBe(
+      join(process.cwd(), "dist", "sendspin-rs-cli"),
+    );
+  });
+
   test("passes playback configuration and owns child shutdown", async () => {
     const root = await mkdtemp(join(tmpdir(), "ma-tui-sendspin-"));
     directories.push(root);
