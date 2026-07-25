@@ -1,0 +1,28 @@
+#!/bin/sh
+
+pkgname=music-assistant-tui
+pkgver=${ARCH_PKGVER}
+pkgrel=1
+pkgdesc="Terminal UI for Music Assistant"
+source=('music-assistant-tui' 'LICENSE')
+arch=('x86_64' 'aarch64')
+url="https://github.com/timmo001/music-assistant-tui"
+license=('Apache-2.0')
+provides=('music-assistant-tui')
+conflicts=('music-assistant-tui-git')
+options=('!strip')
+replaces=('music-assistant-tui-git')
+
+build() {
+  ./music-assistant-tui completions bash > music-assistant-tui.bash
+  ./music-assistant-tui completions fish > music-assistant-tui.fish
+  ./music-assistant-tui completions zsh > _music-assistant-tui
+}
+
+package() {
+  install -Dm755 music-assistant-tui "$pkgdir/usr/bin/music-assistant-tui"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 music-assistant-tui.bash "$pkgdir/usr/share/bash-completion/completions/music-assistant-tui"
+  install -Dm644 music-assistant-tui.fish "$pkgdir/usr/share/fish/vendor_completions.d/music-assistant-tui.fish"
+  install -Dm644 _music-assistant-tui "$pkgdir/usr/share/zsh/site-functions/_music-assistant-tui"
+}

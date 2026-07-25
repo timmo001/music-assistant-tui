@@ -1,0 +1,55 @@
+---
+name: Publish AUR git package
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-aur-git-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Prepare AUR package (music-assistant-tui-git)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: >- # v7
+          actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prepare music-assistant-tui-git
+        run: .scripts/linux/prepare-aur-git.sh "${{ runner.temp }}/aur-package"
+      - name: Upload music-assistant-tui-git
+        uses: >- # v7
+          actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: >-
+            aur-music-assistant-tui-git-${{
+              github.run_id
+            }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/aur-package
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    name: Publish AUR (music-assistant-tui-git)
+    needs: prepare
+    uses: >- # master
+      timmo001/workflows/.github/workflows/publish-aur.yml@635f5727c8686b952f53d2fbe1d2e80d2480c831
+    with:
+      package-name: music-assistant-tui-git
+      artifact-name: >-
+        aur-music-assistant-tui-git-${{
+          github.run_id
+        }}-${{ github.run_attempt }}
+    secrets:
+      AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
