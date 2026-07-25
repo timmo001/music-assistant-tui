@@ -32,6 +32,13 @@ export function buildMenu(strings: Locale): MenuRegistry {
     }),
   ] as const;
   const settings = [
+    item(
+      "settings.playerName",
+      "N",
+      strings.menu.playerName,
+      strings.menu.playerNameDescription,
+      { type: "editPlayerName" },
+    ),
     item("settings.about", "i", strings.menu.about, placeholder, {
       type: "noop",
     }),

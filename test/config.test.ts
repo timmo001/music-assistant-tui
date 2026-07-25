@@ -1,9 +1,13 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { chmod, mkdtemp, readFile, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
-import { tmpdir } from "node:os";
+import { hostname, tmpdir } from "node:os";
 import { Effect } from "effect";
-import { loadConfig, saveConnectionConfig } from "../src/config.js";
+import {
+  loadConfig,
+  saveConnectionConfig,
+  savePlayerName,
+} from "../src/config.js";
 
 const directories: string[] = [];
 
@@ -27,9 +31,24 @@ describe("configuration", () => {
     const second = await Effect.runPromise(loadConfig(env));
     expect(first.sendspinPlayerId).toBe(second.sendspinPlayerId);
     expect(first.token).toBe("environment-token");
+    expect(first.playerName).toBe(`${hostname()} - Music Assistant TUI`);
     expect(
       JSON.parse(await readFile(first.path, "utf8")).sendspinPlayerId,
     ).toBe(first.sendspinPlayerId);
+  });
+
+  test("saves a custom player name", async () => {
+    const root = await mkdtemp(join(tmpdir(), "ma-tui-config-"));
+    directories.push(root);
+    const config = await Effect.runPromise(
+      loadConfig({ XDG_CONFIG_HOME: root }),
+    );
+
+    await Effect.runPromise(savePlayerName(config.path, "Kitchen terminal"));
+
+    expect(
+      await Effect.runPromise(loadConfig({ XDG_CONFIG_HOME: root })),
+    ).toMatchObject({ playerName: "Kitchen terminal" });
   });
 
   test("rejects a token in a broadly readable config file", async () => {

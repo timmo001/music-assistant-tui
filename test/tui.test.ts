@@ -122,6 +122,49 @@ test("routes Ctrl+C through graceful app shutdown", async () => {
   }
 });
 
+test("changes the player name from settings", async () => {
+  const { renderer, mockInput, renderOnce, captureCharFrame } =
+    await createTestRenderer({ width: 80, height: 24 });
+  let playerName = "";
+  try {
+    new App(
+      renderer,
+      DEFAULT_THEME,
+      en,
+      buildMenu(en),
+      "menu",
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      {
+        initialName: "Old name",
+        onSubmit: async (name) => {
+          playerName = name;
+        },
+      },
+    );
+    mockInput.pressArrow("down");
+    mockInput.pressArrow("down");
+    mockInput.pressArrow("down");
+    mockInput.pressEnter();
+    await renderOnce();
+    mockInput.pressEnter();
+    await renderOnce();
+    expect(captureCharFrame()).toContain("Old name");
+
+    for (const _ of "Old name") mockInput.pressBackspace();
+    await mockInput.typeText("Office terminal");
+    mockInput.pressEnter();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(playerName).toBe("Office terminal");
+  } finally {
+    renderer.destroy();
+  }
+});
+
 test("applies consecutive volume and mute controls optimistically", async () => {
   const { renderer, mockInput, renderOnce, captureCharFrame } =
     await createTestRenderer({ width: 80, height: 24 });

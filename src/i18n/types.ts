@@ -10,9 +10,19 @@ export interface Locale {
     readonly search: string;
     readonly players: string;
     readonly settings: string;
+    readonly playerName: string;
+    readonly playerNameDescription: string;
     readonly about: string;
     readonly quit: string;
     readonly placeholder: string;
+  };
+  readonly playerName: {
+    readonly title: string;
+    readonly label: string;
+    readonly required: string;
+    readonly saving: string;
+    readonly saveFailed: string;
+    readonly save: string;
   };
   readonly setup: {
     readonly title: string;

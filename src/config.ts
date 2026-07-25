@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { chmod, mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { homedir } from "node:os";
+import { homedir, hostname } from "node:os";
 import { Effect, Schema } from "effect";
 
 const ConfigFile = Schema.Struct({
@@ -92,6 +92,24 @@ export const saveConnectionConfig = (
       }),
   });
 
+export const savePlayerName = (
+  path: string,
+  playerName: string,
+): Effect.Effect<void, ConfigurationError> =>
+  Effect.tryPromise({
+    try: async () => {
+      const file = await readConfigFile(path);
+      await writeConfigFile(
+        path,
+        await Schema.decodeUnknownPromise(ConfigFile)({ ...file, playerName }),
+      );
+    },
+    catch: (error) =>
+      new ConfigurationError({
+        message: error instanceof Error ? error.message : String(error),
+      }),
+  });
+
 export const loadConfig = (
   env: Readonly<Record<string, string | undefined>> = process.env,
 ): Effect.Effect<AppConfig, ConfigurationError> =>
@@ -120,7 +138,7 @@ export const loadConfig = (
         serverUrl: env.MUSIC_ASSISTANT_URL ?? file.serverUrl,
         token: env.MUSIC_ASSISTANT_TOKEN ?? file.token,
         sendspinPlayerId,
-        playerName: file.playerName ?? "Music Assistant TUI",
+        playerName: file.playerName ?? `${hostname()} - Music Assistant TUI`,
         volume: file.volume ?? 30,
         sendspinBinary: env.SENDSPIN_PLAYER_BINARY ?? file.sendspinBinary,
       };

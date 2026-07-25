@@ -6,6 +6,10 @@ import type { MenuAction, ViewId } from "../types.js";
 import type { PlayerProjection } from "../player.js";
 import { playerCommandForKey, playerHelp } from "../commands.js";
 import { MenuView } from "./MenuView.js";
+import {
+  PlayerNameView,
+  type PlayerNameViewOptions,
+} from "./PlayerNameView.js";
 import { PlayerView } from "./PlayerView.js";
 import { SubmenuView } from "./SubmenuView.js";
 import { SetupView, type SetupViewOptions } from "./SetupView.js";
@@ -15,6 +19,7 @@ export class App {
   private readonly menu: MenuView;
   private readonly submenu: SubmenuView;
   private readonly setup: SetupView;
+  private readonly playerName: PlayerNameView;
   private activeView: ViewId;
   private controlledPlayer?: {
     readonly playerId: string;
@@ -35,6 +40,7 @@ export class App {
       args: Readonly<Record<string, unknown>>,
     ) => void,
     setupOptions?: SetupViewOptions,
+    playerNameOptions?: Omit<PlayerNameViewOptions, "onBack">,
   ) {
     this.player = new PlayerView(renderer, theme, strings, playerHelp(strings));
     this.menu = new MenuView(renderer, theme, strings, {
@@ -53,6 +59,11 @@ export class App {
       onSubmit: async () => {},
       ...setupOptions,
     });
+    this.playerName = new PlayerNameView(renderer, theme, strings, {
+      initialName: playerNameOptions?.initialName ?? strings.app.name,
+      onSubmit: playerNameOptions?.onSubmit ?? (async () => {}),
+      onBack: () => this.show("submenu"),
+    });
     this.activeView = initialView;
     if (projection) this.updatePlayer(projection);
     this.show(initialView);
@@ -66,6 +77,10 @@ export class App {
     }
     if (this.activeView === "setup") {
       this.setup.handleKeyPress(key);
+      return;
+    }
+    if (this.activeView === "playerName") {
+      this.playerName.handleKeyPress(key);
       return;
     }
     if (this.activeView === "player") {
@@ -148,6 +163,9 @@ export class App {
         return;
       case "quit":
         this.onQuit?.();
+        return;
+      case "editPlayerName":
+        this.show("playerName");
     }
   }
 
@@ -156,6 +174,7 @@ export class App {
     this.menu.setVisible(view === "menu");
     this.submenu.setVisible(view === "submenu");
     this.setup.setVisible(view === "setup");
+    this.playerName.setVisible(view === "playerName");
     this.activeView = view;
     this.renderer.setTerminalTitle(
       view === "player"

@@ -1,4 +1,4 @@
-export type ViewId = "player" | "menu" | "setup" | "submenu";
+export type ViewId = "player" | "menu" | "setup" | "submenu" | "playerName";
 
 export interface NoopAction {
   readonly type: "noop";
@@ -13,7 +13,12 @@ export interface QuitAction {
   readonly type: "quit";
 }
 
-export type MenuAction = NoopAction | SubmenuAction | QuitAction;
+export interface EditPlayerNameAction {
+  readonly type: "editPlayerName";
+}
+
+export type MenuAction =
+  NoopAction | SubmenuAction | QuitAction | EditPlayerNameAction;
 
 export interface MenuItem {
   readonly id: string;

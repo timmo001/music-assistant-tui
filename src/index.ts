@@ -5,6 +5,7 @@ import {
   type ConnectionConfig,
   loadConfig,
   saveConnectionConfig,
+  savePlayerName,
 } from "./config.js";
 import { parseFlags, printHelp } from "./flags.js";
 import { Strings } from "./i18n/index.js";
@@ -50,6 +51,7 @@ if (flags.help) {
       const config = yield* loadConfig();
       const connection = yield* Deferred.make<ConnectionConfig>();
       const context = yield* Effect.context<never>();
+      let restartPlayer: ((playerName: string) => Promise<void>) | undefined;
       const needsSetup = config.token === undefined;
       const app = new App(
         renderer,
@@ -67,6 +69,15 @@ if (flags.help) {
               saveConnectionConfig(config.path, values),
             );
             Deferred.doneUnsafe(connection, Effect.succeed(values));
+          },
+        },
+        {
+          initialName: config.playerName,
+          onSubmit: async (playerName) => {
+            await Effect.runPromiseWith(context)(
+              savePlayerName(config.path, playerName),
+            );
+            await restartPlayer?.(playerName);
           },
         },
       );
@@ -107,6 +118,18 @@ if (flags.help) {
           Effect.catchTag("SendspinProcessError", (error) =>
             Effect.logWarning(error.message),
           ),
+        );
+      restartPlayer = (playerName) =>
+        Effect.runPromiseWith(context)(
+          Effect.gen(function* () {
+            yield* sendspin.stop;
+            yield* sendspin.start({
+              serverUrl,
+              playerId: config.sendspinPlayerId,
+              playerName,
+              volume: config.volume,
+            });
+          }),
         );
 
       let musicState = yield* SubscriptionRef.get(musicAssistant.state);

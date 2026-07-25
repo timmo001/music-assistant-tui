@@ -12,6 +12,8 @@ export const en: Locale = {
     search: "Search",
     players: "Players",
     settings: "Settings",
+    playerName: "Player name",
+    playerNameDescription: "Change how this device appears in Music Assistant",
     about: "About",
     quit: "Quit",
     placeholder: "Not implemented yet",
@@ -28,6 +30,14 @@ export const en: Locale = {
     saving: "Saving connection settings...",
     saveFailed: "Could not save connection settings.",
     nextField: "next field",
+    save: "save",
+  },
+  playerName: {
+    title: "Player name",
+    label: "Name",
+    required: "Enter a player name.",
+    saving: "Saving player name...",
+    saveFailed: "Could not update the player name.",
     save: "save",
   },
   help: {
