@@ -16,6 +16,11 @@ export class App {
   private readonly submenu: SubmenuView;
   private readonly setup: SetupView;
   private activeView: ViewId;
+  private controlledPlayer?: {
+    readonly playerId: string;
+    readonly volumeLevel: number;
+    readonly volumeMuted: boolean;
+  };
 
   constructor(
     private readonly renderer: CliRenderer,
@@ -64,10 +69,27 @@ export class App {
       return;
     }
     if (this.activeView === "player") {
-      const command = this.currentProjection
-        ? playerCommandForKey(key, this.currentProjection)
+      const projection = this.currentProjection;
+      const command = projection
+        ? playerCommandForKey(key, projection)
         : undefined;
       if (command) {
+        const isMute = key.sequence?.toLowerCase() === "u";
+        if (
+          command.name === "players/cmd/volume_set" &&
+          typeof command.args.volume_level === "number" &&
+          projection?.player
+        ) {
+          this.controlledPlayer = {
+            playerId: projection.player.player_id,
+            volumeLevel:
+              isMute && !projection.player.volume_muted
+                ? (projection.player.volume_level ?? 30)
+                : command.args.volume_level,
+            volumeMuted: isMute ? !projection.player.volume_muted : false,
+          };
+          this.updatePlayer(projection);
+        }
         this.onPlayerCommand?.(command.name, command.args);
         return;
       }
@@ -89,8 +111,21 @@ export class App {
   private currentProjection?: PlayerProjection;
 
   updatePlayer(projection: PlayerProjection): void {
-    this.currentProjection = projection;
-    this.player.update(projection);
+    const player = projection.player;
+    const controlledPlayer = this.controlledPlayer;
+    const controlled =
+      player && player.player_id === controlledPlayer?.playerId
+        ? {
+            ...projection,
+            player: {
+              ...player,
+              volume_level: controlledPlayer.volumeLevel,
+              volume_muted: controlledPlayer.volumeMuted,
+            },
+          }
+        : projection;
+    this.currentProjection = controlled;
+    this.player.update(controlled);
   }
 
   setPlayerCommandHandler(

@@ -38,7 +38,12 @@ const statusLabel = (projection: PlayerProjection): string => {
     return projection.connection.type;
   if (projection.process.type !== "running")
     return `audio ${projection.process.type}`;
-  return projection.player?.playback_state ?? "stopped";
+  const playback = projection.player?.playback_state ?? "stopped";
+  const volume = projection.player?.volume_level;
+  if (projection.player?.volume_muted) return `${playback} · muted`;
+  return volume === null || volume === undefined
+    ? playback
+    : `${playback} · volume ${volume}%`;
 };
 
 export class PlayerView {

@@ -15,6 +15,8 @@ const projection: PlayerProjection = {
     available: true,
     enabled: true,
     playback_state: "playing",
+    volume_level: 30,
+    volume_muted: false,
     group_members: [],
     supported_features: [],
   }),
@@ -28,15 +30,26 @@ describe("player commands", () => {
   test.each([
     ["comma", "", "players/cmd/previous"],
     ["period", "", "players/cmd/next"],
-    ["equal", "", "players/cmd/volume_up"],
-    ["minus", "", "players/cmd/volume_down"],
+    ["equal", "", "players/cmd/volume_set"],
+    ["minus", "", "players/cmd/volume_set"],
     ["<", "<", "players/cmd/previous"],
     [">", ">", "players/cmd/next"],
-    ["+", "+", "players/cmd/volume_up"],
+    ["+", "+", "players/cmd/volume_set"],
   ])("maps %s to %s", (name, sequence, command) => {
     expect(playerCommandForKey(key(name, sequence), projection)?.name).toBe(
       command,
     );
+  });
+
+  test("sets absolute volume and emulates mute for the playback helper", () => {
+    expect(playerCommandForKey(key("equal"), projection)?.args).toEqual({
+      player_id: "player",
+      volume_level: 33,
+    });
+    expect(playerCommandForKey(key("u", "u"), projection)?.args).toEqual({
+      player_id: "player",
+      volume_level: 0,
+    });
   });
 
   test("shows unshifted shortcuts", () => {

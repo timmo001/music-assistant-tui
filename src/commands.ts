@@ -22,6 +22,16 @@ const playerArgs = (projection: PlayerProjection) =>
     ? null
     : { player_id: projection.player.player_id };
 
+const adjustedVolume = (
+  volume: number | null | undefined,
+  direction: -1 | 1,
+) => {
+  const current = volume ?? 30;
+  const step =
+    current < 10 || current > 90 ? 1 : current < 30 || current > 70 ? 2 : 3;
+  return Math.max(0, Math.min(100, current + direction * step));
+};
+
 export const playerCommands: readonly PlayerCommandSpec[] = [
   {
     id: "play-pause",
@@ -60,7 +70,15 @@ export const playerCommands: readonly PlayerCommandSpec[] = [
     label: "volumeDown",
     command: (projection) => {
       const args = playerArgs(projection);
-      return args === null ? null : { name: "players/cmd/volume_down", args };
+      return args === null
+        ? null
+        : {
+            name: "players/cmd/volume_set",
+            args: {
+              ...args,
+              volume_level: adjustedVolume(projection.player?.volume_level, -1),
+            },
+          };
     },
   },
   {
@@ -70,7 +88,15 @@ export const playerCommands: readonly PlayerCommandSpec[] = [
     label: "volumeUp",
     command: (projection) => {
       const args = playerArgs(projection);
-      return args === null ? null : { name: "players/cmd/volume_up", args };
+      return args === null
+        ? null
+        : {
+            name: "players/cmd/volume_set",
+            args: {
+              ...args,
+              volume_level: adjustedVolume(projection.player?.volume_level, 1),
+            },
+          };
     },
   },
   {
@@ -83,8 +109,13 @@ export const playerCommands: readonly PlayerCommandSpec[] = [
       return args === null
         ? null
         : {
-            name: "players/cmd/volume_mute",
-            args: { ...args, muted: !projection.player?.volume_muted },
+            name: "players/cmd/volume_set",
+            args: {
+              ...args,
+              volume_level: projection.player?.volume_muted
+                ? (projection.player.volume_level ?? 30)
+                : 0,
+            },
           };
     },
   },
