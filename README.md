@@ -10,7 +10,7 @@ Set the Music Assistant token before starting:
 
 ```sh
 export MUSIC_ASSISTANT_TOKEN=your-token
-export MUSIC_ASSISTANT_URL=http://music-assistant.local:8095 # optional; otherwise mDNS discovery is used
+export MUSIC_ASSISTANT_URL=http://homeassistant.local:8095 # optional; otherwise mDNS discovery is used
 mise run dev
 ```
 

@@ -20,7 +20,7 @@ export const en: Locale = {
     title: "Connect to Music Assistant",
     subtitle: "Enter a server URL or leave it blank to use discovery.",
     urlLabel: "Server URL",
-    urlPlaceholder: "http://music-assistant.local:8095",
+    urlPlaceholder: "http://homeassistant.local:8095",
     tokenLabel: "Access token",
     tokenPlaceholder: "Paste your Music Assistant token",
     tokenRequired: "Enter an access token.",
