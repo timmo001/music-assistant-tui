@@ -15,12 +15,20 @@ overrides:
   deb:
     depends:
       - libc6
+      - libasound2
+      - pipewire-audio
   rpm:
     depends:
       - glibc
+      - alsa-lib
+      - pipewire
 contents:
   - src: dist/release/root/music-assistant-tui
     dst: /usr/bin/music-assistant-tui
+    file_info:
+      mode: 0755
+  - src: dist/release/root/sendspin-rs-cli
+    dst: /usr/lib/music-assistant-tui/sendspin-rs-cli
     file_info:
       mode: 0755
   - src: .scripts/linux/completions/music-assistant-tui.bash
@@ -31,3 +39,5 @@ contents:
     dst: /usr/share/zsh/site-functions/_music-assistant-tui
   - src: LICENSE
     dst: /usr/share/licenses/music-assistant-tui/LICENSE
+  - src: THIRD_PARTY_NOTICES.md
+    dst: /usr/share/doc/music-assistant-tui/THIRD_PARTY_NOTICES.md

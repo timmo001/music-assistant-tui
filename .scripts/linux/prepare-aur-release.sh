@@ -50,6 +50,7 @@ tar -xzf "$output_dir/$x86_archive" -C "$output_dir"
 "$output_dir/music-assistant-tui" completions zsh \
   > "$output_dir/_music-assistant-tui"
 install -m 0644 "$repo_root/LICENSE" "$output_dir/LICENSE"
+install -m 0644 "$repo_root/THIRD_PARTY_NOTICES.md" "$output_dir/THIRD_PARTY_NOTICES.md"
 rm -f "$output_dir/music-assistant-tui" \
   "$output_dir/$x86_archive" \
   "$output_dir/SHA256SUMS"

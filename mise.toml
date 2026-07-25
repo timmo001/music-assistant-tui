@@ -44,6 +44,22 @@ description = "Compile the music-assistant-tui binary"
 depends = ["install"]
 run = "bun run build"
 
+[tasks."sendspin:download"]
+description = "Download the pinned Sendspin player for the host architecture"
+run = '''
+mkdir -p dist
+case "$(uname -m)" in
+  x86_64) asset=amd64; checksum=25c21b91b6a0b87f4773f4d70bfc224176646dce49aeba0dc9f16c1f59d198c7 ;;
+  aarch64) asset=arm64; checksum=34772305890323a54506f0ec979ae1aeecc4da10bb7da47901dd799a1a737b20 ;;
+  *) printf 'Unsupported architecture: %s\n' "$(uname -m)" >&2; exit 1 ;;
+esac
+curl --fail --location --silent --show-error \
+  --output dist/sendspin-rs-cli \
+  "https://github.com/s3than/sendspin-rs-cli/releases/download/v0.0.8/sendspin-rs-cli-linux-$asset"
+printf '%s  %s\n' "$checksum" dist/sendspin-rs-cli | sha256sum --check --strict
+chmod 0755 dist/sendspin-rs-cli
+'''
+
 [tasks.typecheck]
 description = "Type-check the music-assistant-tui source"
 depends = ["install"]
@@ -82,9 +98,9 @@ run = "rm -rf build dist"
 
 [tasks."package:arch"]
 description = "Create an Arch Linux package"
-depends = ["install"]
+depends = ["install", "sendspin:download"]
 run = '''
-rm -rf build dist
+rm -rf build
 bun run build
 VERSION="$(git describe --long --tags --abbrev=7 2>/dev/null || printf '0.1.0.r%s.g%s' "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)")"
 VERSION="$(printf '%s' "$VERSION" | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g')"

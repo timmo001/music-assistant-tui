@@ -28,11 +28,18 @@ if [ ! -f "dist/music-assistant-tui" ]; then
   exit 1
 fi
 
+if [ ! -f "dist/sendspin-rs-cli" ]; then
+  echo "dist/sendspin-rs-cli not found, download the pinned player binary first"
+  exit 1
+fi
+
 mkdir -p build/arch
 cd build/arch
 
 cp ../../dist/music-assistant-tui music-assistant-tui
+cp ../../dist/sendspin-rs-cli sendspin-rs-cli
 cp ../../LICENSE LICENSE
+cp ../../THIRD_PARTY_NOTICES.md THIRD_PARTY_NOTICES.md
 cp ../../.scripts/linux/PKGBUILD.binary PKGBUILD
 
 ARCH_PKGVER=$(echo "$VERSION" | sed 's/[-+]/./g')

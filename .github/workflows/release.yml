@@ -31,16 +31,28 @@ jobs:
       !github.event.release.prerelease
     permissions:
       contents: write
-    uses: timmo001/workflows/.github/workflows/release-bun-cli-linux.yml@635f5727c8686b952f53d2fbe1d2e80d2480c831 # master
+    uses: timmo001/workflows/.github/workflows/release-bun-cli-linux.yml@721f4b1e2ed4957afb95ac49968d361e18554497 # master
     with:
       binary-name: music-assistant-tui
       package-name: music-assistant-tui
       entrypoint: src/index.ts
       package-config: .scripts/linux/nfpm.yaml
+      archive-extra-paths: sendspin-rs-cli
       bun-version: 1.3.14
       smoke-test-arguments: --help
       package-prepare-command: |-
         mkdir -p .scripts/linux/completions
+        case "$(uname -m)" in
+          x86_64) sendspin_arch=amd64; sendspin_sha=25c21b91b6a0b87f4773f4d70bfc224176646dce49aeba0dc9f16c1f59d198c7 ;;
+          aarch64) sendspin_arch=arm64; sendspin_sha=34772305890323a54506f0ec979ae1aeecc4da10bb7da47901dd799a1a737b20 ;;
+          *) printf 'Unsupported architecture: %s\n' "$(uname -m)" >&2; exit 1 ;;
+        esac
+        curl --fail --location --silent --show-error \
+          --output dist/release/root/sendspin-rs-cli \
+          "https://github.com/s3than/sendspin-rs-cli/releases/download/v0.0.8/sendspin-rs-cli-linux-$sendspin_arch"
+        printf '%s  %s\n' "$sendspin_sha" dist/release/root/sendspin-rs-cli \
+          | sha256sum --check --strict
+        chmod 0755 dist/release/root/sendspin-rs-cli
         executable=./dist/release/root/music-assistant-tui
         completions=.scripts/linux/completions
         "$executable" completions bash > "$completions/music-assistant-tui.bash"
@@ -97,5 +109,6 @@ jobs:
         music-assistant-tui.fish
         _music-assistant-tui
         LICENSE
+        THIRD_PARTY_NOTICES.md
     secrets:
       AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}

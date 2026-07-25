@@ -4,7 +4,7 @@ pkgname=music-assistant-tui
 pkgver=${ARCH_PKGVER}
 pkgrel=1
 pkgdesc="Terminal UI for Music Assistant"
-source=('music-assistant-tui' 'LICENSE')
+source=('music-assistant-tui' 'sendspin-rs-cli' 'LICENSE' 'THIRD_PARTY_NOTICES.md')
 arch=('x86_64' 'aarch64')
 url="https://github.com/timmo001/music-assistant-tui"
 license=('Apache-2.0')
@@ -12,6 +12,7 @@ provides=('music-assistant-tui')
 conflicts=('music-assistant-tui-git')
 options=('!strip')
 replaces=('music-assistant-tui-git')
+depends=('alsa-lib' 'glibc' 'pipewire-audio')
 
 build() {
   ./music-assistant-tui completions bash > music-assistant-tui.bash
@@ -21,7 +22,9 @@ build() {
 
 package() {
   install -Dm755 music-assistant-tui "$pkgdir/usr/bin/music-assistant-tui"
+  install -Dm755 sendspin-rs-cli "$pkgdir/usr/lib/music-assistant-tui/sendspin-rs-cli"
   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 THIRD_PARTY_NOTICES.md "$pkgdir/usr/share/doc/$pkgname/THIRD_PARTY_NOTICES.md"
   install -Dm644 music-assistant-tui.bash "$pkgdir/usr/share/bash-completion/completions/music-assistant-tui"
   install -Dm644 music-assistant-tui.fish "$pkgdir/usr/share/fish/vendor_completions.d/music-assistant-tui.fish"
   install -Dm644 _music-assistant-tui "$pkgdir/usr/share/zsh/site-functions/_music-assistant-tui"
