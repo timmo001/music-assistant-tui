@@ -24,7 +24,7 @@ Development playback requires `sendspin-rs-cli` on `PATH` or `SENDSPIN_PLAYER_BI
 mise run dev
 ```
 
-The player is the entry view. Use `Space` for play/pause, `<` and `>` for tracks, `-` and `+` for volume, `u` for mute, `m` for the menu, or `Ctrl+C` to exit. Sendspin logs are written under `${XDG_STATE_HOME:-~/.local/state}/music-assistant-tui/`.
+The player is the entry view. On larger terminals it shows album art using portable true-colour half blocks alongside the current track; compact terminals use a text-only layout. Use `Space` for play/pause, `<` and `>` for tracks, `-` and `+` for volume, `u` for mute, `m` for the menu, or `Ctrl+C` to exit. Sendspin logs are written under `${XDG_STATE_HOME:-~/.local/state}/music-assistant-tui/`.
 
 ## Check And Build
 

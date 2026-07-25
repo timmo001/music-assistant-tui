@@ -6,6 +6,10 @@ export const en: Locale = {
     nothingPlaying: "Nothing playing",
     terminalTooSmall: "Terminal too small (minimum 40x10)",
   },
+  player: {
+    nowPlaying: "NOW PLAYING",
+    upNext: "UP NEXT",
+  },
   menu: {
     title: "Menu",
     library: "Library",

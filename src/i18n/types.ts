@@ -4,6 +4,10 @@ export interface Locale {
     readonly nothingPlaying: string;
     readonly terminalTooSmall: string;
   };
+  readonly player: {
+    readonly nowPlaying: string;
+    readonly upNext: string;
+  };
   readonly menu: {
     readonly title: string;
     readonly library: string;
