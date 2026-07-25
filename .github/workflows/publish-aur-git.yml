@@ -21,16 +21,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out source
-        uses: >- # v7
-          actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
           persist-credentials: false
       - name: Prepare music-assistant-tui-git
         run: .scripts/linux/prepare-aur-git.sh "${{ runner.temp }}/aur-package"
       - name: Upload music-assistant-tui-git
-        uses: >- # v7
-          actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: >-
             aur-music-assistant-tui-git-${{
@@ -43,8 +41,7 @@ jobs:
   publish:
     name: Publish AUR (music-assistant-tui-git)
     needs: prepare
-    uses: >- # master
-      timmo001/workflows/.github/workflows/publish-aur.yml@635f5727c8686b952f53d2fbe1d2e80d2480c831
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@635f5727c8686b952f53d2fbe1d2e80d2480c831 # master
     with:
       package-name: music-assistant-tui-git
       artifact-name: >-
