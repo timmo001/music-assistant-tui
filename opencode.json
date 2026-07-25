@@ -41,6 +41,21 @@
       "branch": "main",
       "description": "Sendspin synchronized audio protocol specification"
     },
+    "sendspin-rs": {
+      "repository": "Sendspin/sendspin-rs",
+      "branch": "main",
+      "description": "Rust implementation of the Sendspin protocol and synchronized audio"
+    },
+    "sendspin-rs-cli": {
+      "repository": "s3than/sendspin-rs-cli",
+      "branch": "main",
+      "description": "Prebuilt Sendspin synchronized audio player used by this application"
+    },
+    "cliamp": {
+      "repository": "bjarneo/cliamp",
+      "branch": "main",
+      "description": "Terminal music player used for TUI interaction and layout references"
+    },
     "home-assistant-tui": {
       "repository": "timmo001/home-assistant-tui",
       "branch": "main",
