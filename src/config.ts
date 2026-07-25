@@ -26,6 +26,11 @@ export interface AppConfig {
   readonly sendspinBinary?: string;
 }
 
+export interface ConnectionConfig {
+  readonly serverUrl?: string;
+  readonly token: string;
+}
+
 export class ConfigurationError extends Schema.TaggedErrorClass<ConfigurationError>()(
   "ConfigurationError",
   { message: Schema.String },
@@ -56,6 +61,37 @@ const readConfigFile = async (path: string): Promise<ConfigFile> => {
   }
 };
 
+const writeConfigFile = async (path: string, file: ConfigFile) => {
+  await mkdir(dirname(path), { recursive: true, mode: 0o700 });
+  await writeFile(path, `${JSON.stringify(file, null, 2)}\n`, { mode: 0o600 });
+  await chmod(path, 0o600);
+};
+
+export const saveConnectionConfig = (
+  path: string,
+  connection: ConnectionConfig,
+): Effect.Effect<void, ConfigurationError> =>
+  Effect.tryPromise({
+    try: async () => {
+      const file = await readConfigFile(path);
+      const { serverUrl: _serverUrl, ...rest } = file;
+      const next = await Schema.decodeUnknownPromise(ConfigFile)(
+        connection.serverUrl === undefined
+          ? { ...rest, token: connection.token }
+          : {
+              ...rest,
+              serverUrl: connection.serverUrl,
+              token: connection.token,
+            },
+      );
+      await writeConfigFile(path, next);
+    },
+    catch: (error) =>
+      new ConfigurationError({
+        message: error instanceof Error ? error.message : String(error),
+      }),
+  });
+
 export const loadConfig = (
   env: Readonly<Record<string, string | undefined>> = process.env,
 ): Effect.Effect<AppConfig, ConfigurationError> =>
@@ -76,13 +112,7 @@ export const loadConfig = (
       const sendspinPlayerId =
         file.sendspinPlayerId ?? `music-assistant-tui-${randomUUID()}`;
       if (file.sendspinPlayerId === undefined) {
-        await mkdir(dirname(path), { recursive: true, mode: 0o700 });
-        await writeFile(
-          path,
-          `${JSON.stringify({ ...file, sendspinPlayerId }, null, 2)}\n`,
-          { mode: 0o600 },
-        );
-        await chmod(path, 0o600);
+        await writeConfigFile(path, { ...file, sendspinPlayerId });
       }
 
       return {

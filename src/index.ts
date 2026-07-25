@@ -1,7 +1,11 @@
 import { createCliRenderer } from "@opentui/core";
 import { Deferred, Effect, Stream, SubscriptionRef } from "effect";
 import { renderCompletions, parseCompletionShell } from "./completions.js";
-import { ConfigurationError, loadConfig } from "./config.js";
+import {
+  type ConnectionConfig,
+  loadConfig,
+  saveConnectionConfig,
+} from "./config.js";
 import { parseFlags, printHelp } from "./flags.js";
 import { Strings } from "./i18n/index.js";
 import { buildMenu } from "./menu.js";
@@ -43,35 +47,53 @@ if (flags.help) {
         ),
         (renderer) => Effect.sync(() => renderer.destroy()),
       );
+      const config = yield* loadConfig();
+      const connection = yield* Deferred.make<ConnectionConfig>();
+      const context = yield* Effect.context<never>();
+      const needsSetup = config.token === undefined;
       const app = new App(
         renderer,
         theme,
         strings,
         buildMenu(strings),
-        flags.initialView,
+        needsSetup ? "setup" : flags.initialView,
         undefined,
         () => Deferred.doneUnsafe(quit, Effect.void),
+        undefined,
+        {
+          initialServerUrl: config.serverUrl,
+          onSubmit: async (values) => {
+            await Effect.runPromiseWith(context)(
+              saveConnectionConfig(config.path, values),
+            );
+            Deferred.doneUnsafe(connection, Effect.succeed(values));
+          },
+        },
       );
       renderer.start();
 
-      const config = yield* loadConfig();
-      const discovered = config.serverUrl
+      const configuredConnection = needsSetup
+        ? yield* Deferred.await(connection)
+        : {
+            ...(config.serverUrl ? { serverUrl: config.serverUrl } : {}),
+            token: config.token,
+          };
+      if (needsSetup) app.showPlayer();
+      const discovered = configuredConnection.serverUrl
         ? []
         : yield* discoverServers().pipe(
             Effect.catchTag("DiscoveryError", (error) =>
               Effect.logWarning(error.message).pipe(Effect.as([])),
             ),
           );
-      const serverUrl = yield* selectServer(config.serverUrl, discovered);
-      if (config.token === undefined) {
-        return yield* new ConfigurationError({
-          message: `Music Assistant token missing; set MUSIC_ASSISTANT_TOKEN or update ${config.path}`,
-        });
-      }
+      const serverUrl = yield* selectServer(
+        configuredConnection.serverUrl,
+        discovered,
+      );
 
       const musicAssistant = yield* MusicAssistantClient.connect({
         serverUrl,
-        token: config.token,
+        token: configuredConnection.token,
       });
       const sendspin = yield* SendspinProcess.make(config.sendspinBinary);
       yield* sendspin
@@ -119,7 +141,6 @@ if (flags.help) {
         Stream.runForEach(() => Effect.sync(renderPlayer)),
         Effect.forkScoped,
       );
-      const context = yield* Effect.context<never>();
       app.setPlayerCommandHandler((command, args) => {
         Effect.runForkWith(context)(
           musicAssistant

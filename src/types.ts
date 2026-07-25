@@ -1,4 +1,4 @@
-export type ViewId = "player" | "menu" | "submenu";
+export type ViewId = "player" | "menu" | "setup" | "submenu";
 
 export interface NoopAction {
   readonly type: "noop";

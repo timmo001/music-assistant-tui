@@ -50,3 +50,46 @@ test("renders connection and audio status", async () => {
     renderer.destroy();
   }
 });
+
+test("collects connection settings during first-run setup", async () => {
+  const { renderer, mockInput, renderOnce, captureCharFrame } =
+    await createTestRenderer({ width: 80, height: 24 });
+  let submitted: unknown;
+  try {
+    new App(
+      renderer,
+      DEFAULT_THEME,
+      en,
+      buildMenu(en),
+      "setup",
+      undefined,
+      undefined,
+      undefined,
+      {
+        onSubmit: async (values) => {
+          submitted = values;
+        },
+      },
+    );
+    await renderOnce();
+    expect(captureCharFrame()).toContain(en.setup.title);
+
+    await mockInput.typeText("http://music.local:8095");
+    mockInput.pressEnter();
+    await Promise.resolve();
+    await renderOnce();
+    await mockInput.typeText("secret-token");
+    await renderOnce();
+    expect(captureCharFrame()).toContain("secret-token");
+    mockInput.pressEnter();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(submitted).toEqual({
+      serverUrl: "http://music.local:8095",
+      token: "secret-token",
+    });
+  } finally {
+    renderer.destroy();
+  }
+});

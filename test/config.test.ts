@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { chmod, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdtemp, readFile, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { Effect } from "effect";
-import { loadConfig } from "../src/config.js";
+import { loadConfig, saveConnectionConfig } from "../src/config.js";
 
 const directories: string[] = [];
 
@@ -46,5 +46,26 @@ describe("configuration", () => {
       loadConfig({ XDG_CONFIG_HOME: root }),
     );
     expect(result._tag).toBe("Failure");
+  });
+
+  test("saves connection settings without replacing player configuration", async () => {
+    const root = await mkdtemp(join(tmpdir(), "ma-tui-config-"));
+    directories.push(root);
+    const config = await Effect.runPromise(
+      loadConfig({ XDG_CONFIG_HOME: root }),
+    );
+
+    await Effect.runPromise(
+      saveConnectionConfig(config.path, {
+        serverUrl: "http://music.local:8095",
+        token: "secret",
+      }),
+    );
+
+    const saved = JSON.parse(await readFile(config.path, "utf8"));
+    expect(saved.serverUrl).toBe("http://music.local:8095");
+    expect(saved.token).toBe("secret");
+    expect(saved.sendspinPlayerId).toBe(config.sendspinPlayerId);
+    expect((await stat(config.path)).mode & 0o777).toBe(0o600);
   });
 });

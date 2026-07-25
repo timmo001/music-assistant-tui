@@ -8,11 +8,13 @@ import { playerCommandForKey, playerHelp } from "../commands.js";
 import { MenuView } from "./MenuView.js";
 import { PlayerView } from "./PlayerView.js";
 import { SubmenuView } from "./SubmenuView.js";
+import { SetupView, type SetupViewOptions } from "./SetupView.js";
 
 export class App {
   private readonly player: PlayerView;
   private readonly menu: MenuView;
   private readonly submenu: SubmenuView;
+  private readonly setup: SetupView;
   private activeView: ViewId;
 
   constructor(
@@ -20,13 +22,14 @@ export class App {
     theme: Theme,
     strings: Locale,
     registry: MenuRegistry,
-    initialView: "player" | "menu" = "player",
+    initialView: "player" | "menu" | "setup" = "player",
     projection?: PlayerProjection,
     private readonly onQuit?: () => void,
     private onPlayerCommand?: (
       command: string,
       args: Readonly<Record<string, unknown>>,
     ) => void,
+    setupOptions?: SetupViewOptions,
   ) {
     this.player = new PlayerView(renderer, theme, strings, playerHelp(strings));
     this.menu = new MenuView(renderer, theme, strings, {
@@ -41,6 +44,10 @@ export class App {
       onAction: (item) => this.dispatch(item.action),
       onBack: () => this.show("menu"),
     });
+    this.setup = new SetupView(renderer, theme, strings, {
+      onSubmit: async () => {},
+      ...setupOptions,
+    });
     this.activeView = initialView;
     if (projection) this.updatePlayer(projection);
     this.show(initialView);
@@ -48,6 +55,10 @@ export class App {
   }
 
   private handleKeyPress(key: KeyEvent): void {
+    if (this.activeView === "setup") {
+      this.setup.handleKeyPress(key);
+      return;
+    }
     if (this.activeView === "player") {
       const command = this.currentProjection
         ? playerCommandForKey(key, this.currentProjection)
@@ -84,6 +95,10 @@ export class App {
     this.onPlayerCommand = handler;
   }
 
+  showPlayer(): void {
+    this.show("player");
+  }
+
   private dispatch(action: MenuAction): void {
     switch (action.type) {
       case "noop":
@@ -101,6 +116,7 @@ export class App {
     this.player.setVisible(view === "player");
     this.menu.setVisible(view === "menu");
     this.submenu.setVisible(view === "submenu");
+    this.setup.setVisible(view === "setup");
     this.activeView = view;
     this.renderer.setTerminalTitle(
       view === "player"
