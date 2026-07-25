@@ -88,6 +88,7 @@ export const make = (
     const status = yield* SubscriptionRef.make<ProcessStatus>({
       type: "stopped",
     });
+    const context = yield* Effect.context<never>();
     let process: Bun.Subprocess<"ignore", "ignore", number> | undefined;
 
     const stop = Effect.gen(function* () {
@@ -133,35 +134,41 @@ export const make = (
       const logPath = join(stateHome, "music-assistant-tui", "sendspin.log");
       yield* Effect.promise(() => mkdir(dirname(logPath), { recursive: true }));
       const log = yield* Effect.promise(() => open(logPath, "a"));
-      try {
-        process = Bun.spawn(
-          [
-            binary,
-            "--server",
-            sendspinAddress(options.serverUrl),
-            "--client-id",
-            options.playerId,
-            "--name",
-            options.playerName,
-            "--volume",
-            String(options.volume),
-          ],
-          { stdin: "ignore", stdout: "ignore", stderr: log.fd },
-        );
-      } catch (error) {
-        yield* Effect.promise(() => log.close());
-        yield* SubscriptionRef.set(status, { type: "exited", code: 127 });
-        return yield* new SendspinProcessError({
-          message: error instanceof Error ? error.message : String(error),
-        });
-      }
-      const child = process;
+      const child = yield* Effect.try({
+        try: () =>
+          Bun.spawn(
+            [
+              binary,
+              "--server",
+              sendspinAddress(options.serverUrl),
+              "--client-id",
+              options.playerId,
+              "--name",
+              options.playerName,
+              "--volume",
+              String(options.volume),
+            ],
+            { stdin: "ignore", stdout: "ignore", stderr: log.fd },
+          ),
+        catch: (error) =>
+          new SendspinProcessError({
+            message: error instanceof Error ? error.message : String(error),
+          }),
+      }).pipe(
+        Effect.tapError(() => Effect.promise(() => log.close())),
+        Effect.tapError(() =>
+          SubscriptionRef.set(status, { type: "exited", code: 127 }),
+        ),
+      );
+      process = child;
       yield* SubscriptionRef.set(status, { type: "running", pid: child.pid });
       void child.exited.then(async (code) => {
         await log.close();
         if (process === child) {
           process = undefined;
-          Effect.runFork(SubscriptionRef.set(status, { type: "exited", code }));
+          Effect.runForkWith(context)(
+            SubscriptionRef.set(status, { type: "exited", code }),
+          );
         }
       });
     });

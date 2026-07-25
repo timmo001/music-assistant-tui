@@ -50,7 +50,7 @@ if (flags.help) {
         buildMenu(strings),
         flags.initialView,
         undefined,
-        () => Effect.runFork(Deferred.succeed(quit, undefined)),
+        () => Deferred.doneUnsafe(quit, Effect.void),
       );
       renderer.start();
 
@@ -119,8 +119,9 @@ if (flags.help) {
         Stream.runForEach(() => Effect.sync(renderPlayer)),
         Effect.forkScoped,
       );
+      const context = yield* Effect.context<never>();
       app.setPlayerCommandHandler((command, args) => {
-        Effect.runFork(
+        Effect.runForkWith(context)(
           musicAssistant
             .command(command, args)
             .pipe(
