@@ -1,0 +1,29 @@
+{
+  "name": "music-assistant-tui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare": "effect-tsgo patch",
+    "dev": "bun run --watch src/index.ts",
+    "build": "bun build src/index.ts --compile --outfile dist/music-assistant-tui",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "ci": "bun run format:check && bun run typecheck && bun run test && bun run build",
+    "format": "prettier --write \"{src,test}/**/*.ts\" \"*.{json,md}\" \".github/**/*.yml\" \".scripts/**/*.yaml\"",
+    "format:check": "prettier --check \"{src,test}/**/*.ts\" \"*.{json,md}\" \".github/**/*.yml\" \".scripts/**/*.yaml\"",
+    "check:shell": "bash -n .scripts/linux/*.sh",
+    "check:package": ".scripts/linux/prepare-aur-git.sh /tmp/music-assistant-tui-aur-git && test -f /tmp/music-assistant-tui-aur-git/PKGBUILD"
+  },
+  "dependencies": {
+    "@opentui/core": "^0.4.5",
+    "effect": "^4.0.0-beta.101",
+    "fuse.js": "^7.5.0"
+  },
+  "devDependencies": {
+    "@effect/tsgo": "^0.24.3",
+    "@types/bun": "^1.3.14",
+    "prettier": "^3.9.6",
+    "typescript": "^7.0.2"
+  }
+}

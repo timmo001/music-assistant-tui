@@ -1,0 +1,33 @@
+export interface Locale {
+  readonly app: {
+    readonly name: string;
+    readonly playerPlaceholder: string;
+  };
+  readonly menu: {
+    readonly title: string;
+    readonly library: string;
+    readonly search: string;
+    readonly players: string;
+    readonly settings: string;
+    readonly about: string;
+    readonly quit: string;
+    readonly placeholder: string;
+  };
+  readonly help: {
+    readonly menu: string;
+    readonly navigate: string;
+    readonly select: string;
+    readonly filter: string;
+    readonly back: string;
+    readonly quit: string;
+  };
+  readonly keys: {
+    readonly arrowsUD: string;
+    readonly enter: string;
+    readonly typeInput: string;
+    readonly esc: string;
+    readonly backspace: string;
+    readonly ctrl: { readonly c: string };
+    readonly m: string;
+  };
+}
