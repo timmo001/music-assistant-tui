@@ -1,0 +1,50 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "references": {
+    "server": {
+      "repository": "music-assistant/server",
+      "branch": "dev",
+      "description": "Music Assistant server and core media library manager"
+    },
+    "models": {
+      "repository": "music-assistant/models",
+      "branch": "main",
+      "description": "Shared Music Assistant client and server models"
+    },
+    "client": {
+      "repository": "music-assistant/client",
+      "branch": "main",
+      "description": "Python client for the Music Assistant Server API"
+    },
+    "frontend": {
+      "repository": "music-assistant/frontend",
+      "branch": "main",
+      "description": "Official Vue client for Music Assistant"
+    },
+    "mobile-app": {
+      "repository": "music-assistant/mobile-app",
+      "branch": "main",
+      "description": "Official Music Assistant Android and iOS client"
+    },
+    "desktop-app": {
+      "repository": "music-assistant/desktop-app",
+      "branch": "main",
+      "description": "Official Music Assistant desktop client"
+    },
+    "tvos": {
+      "repository": "music-assistant/tvos",
+      "branch": "main",
+      "description": "Official Music Assistant Apple TV client"
+    },
+    "sendspin": {
+      "repository": "Sendspin/spec",
+      "branch": "main",
+      "description": "Sendspin synchronized audio protocol specification"
+    },
+    "home-assistant-tui": {
+      "repository": "timmo001/home-assistant-tui",
+      "branch": "main",
+      "description": "Terminal User Interface for Home Assistant"
+    }
+  }
+}
