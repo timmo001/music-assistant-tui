@@ -1,7 +1,8 @@
 export interface Locale {
   readonly app: {
     readonly name: string;
-    readonly playerPlaceholder: string;
+    readonly nothingPlaying: string;
+    readonly terminalTooSmall: string;
   };
   readonly menu: {
     readonly title: string;
@@ -20,6 +21,12 @@ export interface Locale {
     readonly filter: string;
     readonly back: string;
     readonly quit: string;
+    readonly playPause: string;
+    readonly previous: string;
+    readonly next: string;
+    readonly volumeDown: string;
+    readonly volumeUp: string;
+    readonly mute: string;
   };
   readonly keys: {
     readonly arrowsUD: string;

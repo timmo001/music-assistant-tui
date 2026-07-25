@@ -3,7 +3,8 @@ import type { Locale } from "./types.js";
 export const en: Locale = {
   app: {
     name: "Music Assistant TUI",
-    playerPlaceholder: "Player view not implemented yet",
+    nothingPlaying: "Nothing playing",
+    terminalTooSmall: "Terminal too small (minimum 40x10)",
   },
   menu: {
     title: "Menu",
@@ -22,6 +23,12 @@ export const en: Locale = {
     filter: "filter",
     back: "back",
     quit: "quit",
+    playPause: "play/pause",
+    previous: "previous",
+    next: "next",
+    volumeDown: "volume down",
+    volumeUp: "volume up",
+    mute: "mute",
   },
   keys: {
     arrowsUD: "Up/Down",

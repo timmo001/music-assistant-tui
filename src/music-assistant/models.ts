@@ -49,7 +49,7 @@ export interface MediaItemSummary extends Schema.Schema.Type<
 
 export const PlayerMedia = Schema.Struct({
   uri: Schema.String,
-  title: Schema.String,
+  title: NullableString,
   artist: Schema.optionalKey(NullableString),
   album: Schema.optionalKey(NullableString),
   image_url: Schema.optionalKey(NullableString),
@@ -69,6 +69,7 @@ export const Player = Schema.Struct({
   name: Schema.String,
   available: Schema.Boolean,
   enabled: Schema.Boolean,
+  device_info: Schema.optionalKey(Schema.Unknown),
   playback_state: Schema.String,
   elapsed_time: Schema.optionalKey(NullableNumber),
   elapsed_time_last_updated: Schema.optionalKey(NullableNumber),
