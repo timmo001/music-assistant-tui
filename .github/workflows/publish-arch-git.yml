@@ -27,7 +27,7 @@ jobs:
   publish:
     name: Publish Arch package (music-assistant-tui-git)
     # yamllint disable-line rule:line-length
-    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@4797d9f93b2636e75dda38232aac206ac161f7e5  # master
+    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@4797d9f93b2636e75dda38232aac206ac161f7e5 # master
     with:
       package-name: music-assistant-tui-git
     secrets:
