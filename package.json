@@ -16,7 +16,7 @@
     "check:package": ".scripts/linux/prepare-aur-git.sh /tmp/music-assistant-tui-aur-git && test -f /tmp/music-assistant-tui-aur-git/PKGBUILD"
   },
   "dependencies": {
-    "@opentui/core": "^0.4.5",
+    "@opentui/core": "^0.5.0",
     "effect": "^4.0.0-beta.101",
     "fuse.js": "^7.5.0",
     "jimp": "1.6.1",
