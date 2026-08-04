@@ -31,7 +31,7 @@ jobs:
       !github.event.release.prerelease
     permissions:
       contents: write
-    uses: timmo001/workflows/.github/workflows/release-bun-cli-linux.yml@0ccca490086f604ff9d1c6005ee6c4338bc639b8 # master
+    uses: timmo001/workflows/.github/workflows/release-bun-cli-linux.yml@bb5682350cf340c8a9e95247322cb6ccf9bde8e3 # master
     with:
       binary-name: music-assistant-tui
       package-name: music-assistant-tui
@@ -112,7 +112,7 @@ jobs:
   publish-aur:
     name: Publish AUR (music-assistant-tui)
     needs: prepare-aur
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@0ccca490086f604ff9d1c6005ee6c4338bc639b8 # master
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@bb5682350cf340c8a9e95247322cb6ccf9bde8e3 # master
     with:
       package-name: music-assistant-tui
       artifact-name: >-
