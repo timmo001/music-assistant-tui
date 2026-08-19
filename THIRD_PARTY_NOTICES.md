@@ -2,7 +2,7 @@
 
 ## sendspin-rs-cli
 
-Packaged releases include `sendspin-rs-cli` v0.0.8 from
+Packaged releases include `sendspin-rs-cli` v0.0.9 from
 <https://github.com/s3than/sendspin-rs-cli>.
 
 Copyright Sendspin contributors. Licensed under the Apache License 2.0. The
