@@ -55,7 +55,7 @@ case "$(uname -m)" in
 esac
 curl --fail --location --silent --show-error \
   --output dist/sendspin-rs-cli \
-  "https://github.com/s3than/sendspin-rs-cli/releases/download/v0.0.8/sendspin-rs-cli-linux-$asset"
+  "https://github.com/s3than/sendspin-rs-cli/releases/download/v0.0.9/sendspin-rs-cli-linux-$asset"
 printf '%s  %s\n' "$checksum" dist/sendspin-rs-cli | sha256sum --check --strict
 chmod 0755 dist/sendspin-rs-cli
 '''
