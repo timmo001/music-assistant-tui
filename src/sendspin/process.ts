@@ -11,7 +11,7 @@ import {
   type Scope,
 } from "effect";
 
-export const SUPPORTED_VERSION = "0.0.8";
+export const SUPPORTED_VERSION = "0.0.9";
 
 export type ProcessStatus =
   | { readonly type: "stopped" }
