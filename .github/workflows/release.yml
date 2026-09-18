@@ -31,7 +31,7 @@ jobs:
       !github.event.release.prerelease
     permissions:
       contents: write
-    uses: timmo001/workflows/.github/workflows/release-bun-cli-linux.yml@7f8dd7688477dbdd147aa0e9ec381a4c72e63a0e # master
+    uses: timmo001/workflows/.github/workflows/release-bun-cli-linux.yml@ae10c4119924b02a07972b9f0b33c51f4f600d09 # master
     with:
       binary-name: music-assistant-tui
       package-name: music-assistant-tui
@@ -98,7 +98,7 @@ jobs:
     name: Build Arch package (music-assistant-tui)
     needs: prepare-aur
     # yamllint disable-line rule:line-length
-    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@7f8dd7688477dbdd147aa0e9ec381a4c72e63a0e # master
+    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@ae10c4119924b02a07972b9f0b33c51f4f600d09 # master
     with:
       package-name: music-assistant-tui
       package-files-artifact-name: >-
@@ -112,7 +112,7 @@ jobs:
   publish-aur:
     name: Publish AUR (music-assistant-tui)
     needs: prepare-aur
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@7f8dd7688477dbdd147aa0e9ec381a4c72e63a0e # master
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@ae10c4119924b02a07972b9f0b33c51f4f600d09 # master
     with:
       package-name: music-assistant-tui
       artifact-name: >-
