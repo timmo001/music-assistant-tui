@@ -31,7 +31,7 @@ export interface ConnectionConfig {
   readonly token: string;
 }
 
-export class ConfigurationError extends Schema.TaggedErrorClass<ConfigurationError>()(
+export class ConfigurationError extends Schema.TaggedError<ConfigurationError>()(
   "ConfigurationError",
   { message: Schema.String },
 ) {}

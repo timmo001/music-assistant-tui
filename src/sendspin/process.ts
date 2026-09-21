@@ -19,7 +19,7 @@ export type ProcessStatus =
   | { readonly type: "running"; readonly pid: number }
   | { readonly type: "exited"; readonly code: number };
 
-export class SendspinProcessError extends Schema.TaggedErrorClass<SendspinProcessError>()(
+export class SendspinProcessError extends Schema.TaggedError<SendspinProcessError>()(
   "SendspinProcessError",
   { message: Schema.String },
 ) {}

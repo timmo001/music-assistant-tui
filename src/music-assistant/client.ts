@@ -35,7 +35,7 @@ export interface MusicAssistantSnapshot {
   readonly queues: ReadonlyMap<string, PlayerQueue>;
 }
 
-export class MusicAssistantError extends Schema.TaggedErrorClass<MusicAssistantError>()(
+export class MusicAssistantError extends Schema.TaggedError<MusicAssistantError>()(
   "MusicAssistantError",
   { message: Schema.String },
 ) {}

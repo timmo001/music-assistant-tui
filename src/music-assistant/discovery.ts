@@ -11,12 +11,12 @@ export interface DiscoveredServer {
   readonly url: string;
 }
 
-export class DiscoveryError extends Schema.TaggedErrorClass<DiscoveryError>()(
+export class DiscoveryError extends Schema.TaggedError<DiscoveryError>()(
   "DiscoveryError",
   { message: Schema.String },
 ) {}
 
-export class ServerSelectionRequired extends Schema.TaggedErrorClass<ServerSelectionRequired>()(
+export class ServerSelectionRequired extends Schema.TaggedError<ServerSelectionRequired>()(
   "ServerSelectionRequired",
   { servers: Schema.Array(Schema.String) },
 ) {}
