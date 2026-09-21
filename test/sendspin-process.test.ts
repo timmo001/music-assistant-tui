@@ -53,14 +53,18 @@ while :; do sleep 1; done
           });
           yield* Effect.sleep("50 millis");
           const running = yield* SubscriptionRef.get(service.status);
+
           if (running.type !== "running")
             throw new Error("fixture did not start");
+
           const commandLine = yield* Effect.promise(() =>
             readFile(`/proc/${running.pid}/cmdline`, "utf8"),
           );
+
           const args = commandLine.split("\0").filter(Boolean).slice(2);
           yield* service.stop;
           const stopped = yield* SubscriptionRef.get(service.status);
+
           return { running, stopped, args };
         }),
       ),
@@ -108,8 +112,10 @@ while :; do sleep 1; done
             volume: 40,
           });
           const status = yield* SubscriptionRef.get(service.status);
+
           if (status.type !== "running")
             throw new Error("fixture did not start");
+
           return status.pid;
         }),
       ),

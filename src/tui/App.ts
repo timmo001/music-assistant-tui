@@ -4,6 +4,7 @@ import type { MenuRegistry } from "../menu.js";
 import type { Theme } from "../theme.js";
 import type { MenuAction, ViewId } from "../types.js";
 import type { PlayerProjection } from "../player.js";
+import type { CommandMessage } from "../music-assistant/models.js";
 import { playerCommandForKey, playerHelp } from "../commands.js";
 import { MenuView } from "./MenuView.js";
 import {
@@ -37,7 +38,7 @@ export class App {
     private readonly onQuit?: () => void,
     private onPlayerCommand?: (
       command: string,
-      args: Readonly<Record<string, unknown>>,
+      args: NonNullable<CommandMessage["args"]>,
     ) => void,
     setupOptions?: SetupViewOptions,
     playerNameOptions?: Omit<PlayerNameViewOptions, "onBack">,
@@ -65,6 +66,7 @@ export class App {
       onBack: () => this.show("submenu"),
     });
     this.activeView = initialView;
+
     if (projection) this.updatePlayer(projection);
     this.show(initialView);
     renderer.keyInput.on("keypress", (key) => this.handleKeyPress(key));
@@ -73,26 +75,35 @@ export class App {
   private handleKeyPress(key: KeyEvent): void {
     if (key.ctrl && key.name === "c") {
       this.onQuit?.();
+
       return;
     }
+
     if (this.activeView === "setup") {
       this.setup.handleKeyPress(key);
+
       return;
     }
+
     if (this.activeView === "playerName") {
       this.playerName.handleKeyPress(key);
+
       return;
     }
+
     if (this.activeView === "player") {
       const projection = this.currentProjection;
+
       const command = projection
         ? playerCommandForKey(key, projection)
         : undefined;
+
       if (command) {
         const isMute = key.sequence?.toLowerCase() === "u";
+
         if (
           command.name === "players/cmd/volume_set" &&
-          typeof command.args.volume_level === "number" &&
+          command.args.volume_level !== undefined &&
           projection?.player
         ) {
           this.controlledPlayer = {
@@ -105,14 +116,19 @@ export class App {
           };
           this.updatePlayer(projection);
         }
+
         this.onPlayerCommand?.(command.name, command.args);
+
         return;
       }
     }
+
     if (this.activeView === "menu" && key.name === "escape") {
       this.show("player");
+
       return;
     }
+
     if (
       this.activeView === "player" &&
       key.sequence?.toLowerCase() === "m" &&
@@ -128,6 +144,7 @@ export class App {
   updatePlayer(projection: PlayerProjection): void {
     const player = projection.player;
     const controlledPlayer = this.controlledPlayer;
+
     const controlled =
       player && player.player_id === controlledPlayer?.playerId
         ? {
@@ -139,12 +156,16 @@ export class App {
             },
           }
         : projection;
+
     this.currentProjection = controlled;
     this.player.update(controlled);
   }
 
   setPlayerCommandHandler(
-    handler: (command: string, args: Readonly<Record<string, unknown>>) => void,
+    handler: (
+      command: string,
+      args: NonNullable<CommandMessage["args"]>,
+    ) => void,
   ): void {
     this.onPlayerCommand = handler;
   }
@@ -160,9 +181,11 @@ export class App {
       case "submenu":
         this.submenu.openSubmenu(action.menuId);
         this.show("submenu");
+
         return;
       case "quit":
         this.onQuit?.();
+
         return;
       case "editPlayerName":
         this.show("playerName");
@@ -181,7 +204,9 @@ export class App {
         ? "Music Assistant TUI"
         : `Music Assistant TUI - ${view}`,
     );
+
     if (view === "menu") this.menu.resetAndFocus();
+
     if (view === "submenu") this.submenu.resetAndFocus();
   }
 }

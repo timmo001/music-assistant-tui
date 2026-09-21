@@ -1,9 +1,11 @@
 import { Schema } from "effect";
 
 export const MessageId = Schema.String.pipe(Schema.brand("MessageId"));
+
 export type MessageId = typeof MessageId.Type;
 
 const NullableString = Schema.NullOr(Schema.String);
+
 const NullableNumber = Schema.NullOr(Schema.Finite);
 
 export const ServerInfo = Schema.Struct({
@@ -20,6 +22,7 @@ export const ServerInfo = Schema.Struct({
   external_url: Schema.optionalKey(NullableString),
   has_remote_access: Schema.Boolean,
 });
+
 export interface ServerInfo extends Schema.Schema.Type<typeof ServerInfo> {}
 
 export const MediaItemImage = Schema.Struct({
@@ -29,6 +32,7 @@ export const MediaItemImage = Schema.Struct({
   remotely_accessible: Schema.Boolean,
   proxy_id: Schema.optionalKey(NullableString),
 });
+
 export interface MediaItemImage extends Schema.Schema.Type<
   typeof MediaItemImage
 > {}
@@ -43,6 +47,7 @@ export const MediaItemSummary = Schema.Struct({
   version: Schema.optionalKey(Schema.String),
   sort_name: Schema.optionalKey(NullableString),
 });
+
 export interface MediaItemSummary extends Schema.Schema.Type<
   typeof MediaItemSummary
 > {}
@@ -60,6 +65,7 @@ export const PlayerMedia = Schema.Struct({
   source_id: Schema.optionalKey(NullableString),
   queue_item_id: Schema.optionalKey(NullableString),
 });
+
 export interface PlayerMedia extends Schema.Schema.Type<typeof PlayerMedia> {}
 
 export const Player = Schema.Struct({
@@ -82,6 +88,7 @@ export const Player = Schema.Struct({
   supported_features: Schema.Array(Schema.String),
   current_media: Schema.optionalKey(Schema.NullOr(PlayerMedia)),
 });
+
 export interface Player extends Schema.Schema.Type<typeof Player> {}
 
 export const QueueItem = Schema.Struct({
@@ -94,6 +101,7 @@ export const QueueItem = Schema.Struct({
   image: Schema.optionalKey(Schema.NullOr(MediaItemImage)),
   media_item: Schema.optionalKey(Schema.NullOr(MediaItemSummary)),
 });
+
 export interface QueueItem extends Schema.Schema.Type<typeof QueueItem> {}
 
 export const PlayerQueue = Schema.Struct({
@@ -113,24 +121,25 @@ export const PlayerQueue = Schema.Struct({
   current_item: Schema.optionalKey(Schema.NullOr(QueueItem)),
   next_item: Schema.optionalKey(Schema.NullOr(QueueItem)),
 });
+
 export interface PlayerQueue extends Schema.Schema.Type<typeof PlayerQueue> {}
 
 export const CommandMessage = Schema.Struct({
   message_id: MessageId,
   command: Schema.String,
-  args: Schema.optionalKey(
-    Schema.NullOr(Schema.Record(Schema.String, Schema.Unknown)),
-  ),
+  args: Schema.optionalKey(Schema.NullOr(Schema.JsonObject)),
 });
+
 export interface CommandMessage extends Schema.Schema.Type<
   typeof CommandMessage
 > {}
 
 export const SuccessResultMessage = Schema.Struct({
   message_id: MessageId,
-  result: Schema.Unknown,
+  result: Schema.Json,
   partial: Schema.optionalKey(Schema.Boolean),
 });
+
 export interface SuccessResultMessage extends Schema.Schema.Type<
   typeof SuccessResultMessage
 > {}
@@ -140,6 +149,7 @@ export const ErrorResultMessage = Schema.Struct({
   error_code: Schema.Finite,
   details: Schema.optionalKey(NullableString),
 });
+
 export interface ErrorResultMessage extends Schema.Schema.Type<
   typeof ErrorResultMessage
 > {}
@@ -149,4 +159,5 @@ export const EventMessage = Schema.Struct({
   object_id: Schema.optionalKey(NullableString),
   data: Schema.optionalKey(Schema.Unknown),
 });
+
 export interface EventMessage extends Schema.Schema.Type<typeof EventMessage> {}

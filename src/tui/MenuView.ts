@@ -119,6 +119,7 @@ export class MenuView {
   /** Show or hide the main menu view */
   setVisible(visible: boolean): void {
     this.root.visible = visible;
+
     if (!visible) {
       this.blur();
     }

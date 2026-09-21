@@ -19,6 +19,7 @@ const item = (
 
 export function buildMenu(strings: Locale): MenuRegistry {
   const placeholder = strings.menu.placeholder;
+
   const mainMenuItems = [
     item("library", "L", strings.menu.library, placeholder, { type: "noop" }),
     item("search", "/", strings.menu.search, placeholder, { type: "noop" }),
@@ -31,6 +32,7 @@ export function buildMenu(strings: Locale): MenuRegistry {
       type: "quit",
     }),
   ] as const;
+
   const settings = [
     item(
       "settings.playerName",
@@ -43,13 +45,17 @@ export function buildMenu(strings: Locale): MenuRegistry {
       type: "noop",
     }),
   ];
+
   const submenus = new Map<string, readonly MenuItem[]>([
     ["settings", settings],
   ]);
+
   const submenuTitles = new Map([["settings", strings.menu.settings]]);
   const menuItemsById = new Map<string, MenuItem>();
+
   for (const menuItem of [...mainMenuItems, ...settings]) {
     menuItemsById.set(menuItem.id, menuItem);
   }
+
   return { mainMenuItems, submenus, submenuTitles, menuItemsById };
 }

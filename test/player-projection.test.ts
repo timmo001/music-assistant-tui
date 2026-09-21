@@ -26,6 +26,7 @@ describe("player projection", () => {
         elapsed_time: 12,
       },
     });
+
     const snapshot: MusicAssistantSnapshot = {
       connection: {
         type: "authenticated",
@@ -49,6 +50,7 @@ describe("player projection", () => {
       { type: "running", pid: 123 },
       player.player_id,
     );
+
     expect(projection.title).toBe("Track");
     expect(projection.artist).toBe("Artist");
     expect(projection.elapsed).toBe(12);
@@ -73,6 +75,7 @@ describe("player projection", () => {
         media_type: "track",
       },
     });
+
     const queue = PlayerQueue.make({
       queue_id: player.player_id,
       active: true,
@@ -160,6 +163,7 @@ describe("player projection", () => {
         },
       },
     });
+
     const snapshot = (schemaVersion: number): MusicAssistantSnapshot => ({
       connection: {
         type: "authenticated",
@@ -206,6 +210,7 @@ describe("player projection", () => {
       repeat_mode: "off",
       autoplay_enabled: false,
     });
+
     const projection = projectPlayer(
       {
         connection: { type: "connecting" },
@@ -216,6 +221,7 @@ describe("player projection", () => {
       queue.queue_id,
       105,
     );
+
     expect(projection.elapsed).toBe(15);
   });
 
@@ -231,6 +237,7 @@ describe("player projection", () => {
       group_members: [],
       supported_features: [],
     });
+
     const queue = PlayerQueue.make({
       queue_id: player.player_id,
       active: true,

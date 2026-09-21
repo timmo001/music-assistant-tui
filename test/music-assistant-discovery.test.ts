@@ -20,6 +20,7 @@ describe("Music Assistant discovery selection", () => {
         { name: "Two", url: "http://two.local:8095" },
       ]),
     );
+
     expect(result._tag).toBe("Failure");
   });
 });

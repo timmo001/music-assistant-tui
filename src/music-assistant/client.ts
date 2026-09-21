@@ -10,7 +10,7 @@ import {
 import {
   accumulatePartialResult,
   classifyMessage,
-  makeCommand,
+  createCommandMessage,
   normalizeServerInfoUrls,
   toWebSocketUrl,
 } from "./api.js";
@@ -18,6 +18,7 @@ import {
   MessageId,
   Player,
   PlayerQueue,
+  type CommandMessage,
   type EventMessage,
   type ServerInfo,
 } from "./models.js";
@@ -47,8 +48,8 @@ interface Options {
 }
 
 interface PendingCommand {
-  readonly partial: unknown[];
-  readonly resolve: (value: unknown) => void;
+  readonly partial: Schema.Json[];
+  readonly resolve: (value: Schema.Json) => void;
   readonly reject: (error: MusicAssistantError) => void;
 }
 
@@ -56,8 +57,8 @@ export interface Interface {
   readonly state: SubscriptionRef.SubscriptionRef<MusicAssistantSnapshot>;
   readonly command: (
     command: string,
-    args?: Readonly<Record<string, unknown>>,
-  ) => Effect.Effect<unknown, MusicAssistantError>;
+    args?: NonNullable<CommandMessage["args"]>,
+  ) => Effect.Effect<Schema.Json, MusicAssistantError>;
   readonly disconnect: Effect.Effect<void>;
 }
 
@@ -72,6 +73,7 @@ const emptySnapshot = (): MusicAssistantSnapshot => ({
 });
 
 const decodePlayers = Schema.decodeUnknownPromise(Schema.Array(Player));
+
 const decodeQueues = Schema.decodeUnknownPromise(Schema.Array(PlayerQueue));
 
 export const connect = (
@@ -83,10 +85,13 @@ export const connect = (
         const state = await Effect.runPromise(
           SubscriptionRef.make(emptySnapshot()),
         );
+
         const pending = new Map<string, PendingCommand>();
+
         const socket = (options.webSocket ?? ((url) => new WebSocket(url)))(
           toWebSocketUrl(options.serverUrl),
         );
+
         let serverInfo: ServerInfo | undefined;
 
         const setState = (
@@ -97,6 +102,7 @@ export const connect = (
           for (const request of pending.values()) {
             request.reject(new MusicAssistantError({ message }));
           }
+
           pending.clear();
         };
 
@@ -107,51 +113,64 @@ export const connect = (
               const player = await Schema.decodeUnknownPromise(Player)(
                 event.data,
               );
+
               setState((current) => ({
                 ...current,
                 players: new Map(current.players).set(player.player_id, player),
               }));
+
               return;
             }
+
             case "player_removed":
               if (event.object_id !== undefined && event.object_id !== null) {
                 setState((current) => {
                   const players = new Map(current.players);
                   players.delete(event.object_id!);
+
                   return { ...current, players };
                 });
               }
+
               return;
             case "queue_added":
             case "queue_updated": {
               const queue = await Schema.decodeUnknownPromise(PlayerQueue)(
                 event.data,
               );
+
               setState((current) => ({
                 ...current,
                 queues: new Map(current.queues).set(queue.queue_id, queue),
               }));
+
               return;
             }
-            case "queue_time_updated":
+
+            case "queue_time_updated": {
+              const elapsedTime = event.data;
+
               if (
                 event.object_id !== undefined &&
                 event.object_id !== null &&
-                typeof event.data === "number"
+                Schema.is(Schema.Number)(elapsedTime)
               ) {
                 setState((current) => {
                   const queue = current.queues.get(event.object_id!);
+
                   if (queue === undefined) return current;
+
                   return {
                     ...current,
                     queues: new Map(current.queues).set(event.object_id!, {
                       ...queue,
-                      elapsed_time: event.data as number,
+                      elapsed_time: elapsedTime,
                       elapsed_time_last_updated: Date.now() / 1000,
                     }),
                   };
                 });
               }
+            }
           }
         };
 
@@ -159,16 +178,23 @@ export const connect = (
           void (async () => {
             const raw = JSON.parse(String(event.data));
             const message = await Effect.runPromise(classifyMessage(raw));
+
             if (message.type === "server-info") {
               serverInfo = normalizeServerInfoUrls(message.value);
+
               return;
             }
+
             if (message.type === "event") {
               await applyEvent(message.value);
+
               return;
             }
+
             const request = pending.get(message.value.message_id);
+
             if (request === undefined) return;
+
             if (message.type === "error") {
               pending.delete(message.value.message_id);
               request.reject(
@@ -178,15 +204,20 @@ export const connect = (
                     `API error ${message.value.error_code}`,
                 }),
               );
+
               return;
             }
+
             if (message.value.partial) {
               request.partial.push(
                 ...accumulatePartialResult([], message.value),
               );
+
               return;
             }
+
             pending.delete(message.value.message_id);
+
             if (request.partial.length > 0) {
               request.resolve([
                 ...request.partial,
@@ -222,28 +253,33 @@ export const connect = (
 
         const commandPromise = (
           name: string,
-          args?: Readonly<Record<string, unknown>>,
-        ): Promise<unknown> => {
+          args?: NonNullable<CommandMessage["args"]>,
+        ): Promise<Schema.Json> => {
           const id = MessageId.make(randomUUID().replaceAll("-", ""));
+
           return new Promise((resolve, reject) => {
             pending.set(id, { partial: [], resolve, reject });
-            socket.send(JSON.stringify(makeCommand(id, name, args)));
+            socket.send(JSON.stringify(createCommandMessage(id, name, args)));
           });
         };
 
         try {
           await opened;
           const serverDeadline = Date.now() + 5000;
+
           while (serverInfo === undefined && Date.now() < serverDeadline) {
             await Bun.sleep(10);
           }
+
           if (serverInfo === undefined)
             throw new Error("Music Assistant server info timed out");
+
           if (serverInfo.min_supported_schema_version > API_SCHEMA_VERSION) {
             throw new Error(
               `Server requires API schema ${serverInfo.min_supported_schema_version}; client supports ${API_SCHEMA_VERSION}`,
             );
           }
+
           if (!(await commandPromise("auth", { token: options.token }))) {
             throw new Error("Music Assistant authentication failed");
           }
@@ -252,6 +288,7 @@ export const connect = (
             commandPromise("players/all").then(decodePlayers),
             commandPromise("player_queues/all").then(decodeQueues),
           ]);
+
           await Effect.runPromise(
             SubscriptionRef.set(state, {
               connection: { type: "authenticated", server: serverInfo },
@@ -263,7 +300,7 @@ export const connect = (
           );
 
           const command = Effect.fn("MusicAssistant.command")(
-            (name: string, args?: Readonly<Record<string, unknown>>) =>
+            (name: string, args?: NonNullable<CommandMessage["args"]>) =>
               Effect.tryPromise({
                 try: () => commandPromise(name, args),
                 catch: (error) =>
@@ -277,7 +314,9 @@ export const connect = (
                       }),
               }),
           );
+
           const disconnect = Effect.sync(() => socket.close(1000, "shutdown"));
+
           return Service.of({ state, command, disconnect });
         } catch (error) {
           socket.close(1000, "connection setup failed");

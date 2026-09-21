@@ -14,6 +14,7 @@ const ConfigFile = Schema.Struct({
   ),
   sendspinBinary: Schema.optionalKey(Schema.String),
 });
+
 type ConfigFile = typeof ConfigFile.Type;
 
 export interface AppConfig {
@@ -49,14 +50,10 @@ const readConfigFile = async (path: string): Promise<ConfigFile> => {
       JSON.parse(await readFile(path, "utf8")),
     );
   } catch (error) {
-    if (
-      typeof error === "object" &&
-      error !== null &&
-      "code" in error &&
-      error.code === "ENOENT"
-    ) {
+    if (Schema.is(Schema.Struct({ code: Schema.Literal("ENOENT") }))(error)) {
       return {};
     }
+
     throw error;
   }
 };
@@ -75,6 +72,7 @@ export const saveConnectionConfig = (
     try: async () => {
       const file = await readConfigFile(path);
       const { serverUrl: _serverUrl, ...rest } = file;
+
       const next = await Schema.decodeUnknownPromise(ConfigFile)(
         connection.serverUrl === undefined
           ? { ...rest, token: connection.token }
@@ -84,6 +82,7 @@ export const saveConnectionConfig = (
               token: connection.token,
             },
       );
+
       await writeConfigFile(path, next);
     },
     catch: (error) =>
@@ -120,6 +119,7 @@ export const loadConfig = (
 
       if (file.token !== undefined) {
         const metadata = await stat(path);
+
         if ((metadata.mode & 0o077) !== 0) {
           throw new Error(
             `Configuration file containing a token must use mode 0600: ${path}`,
@@ -129,6 +129,7 @@ export const loadConfig = (
 
       const sendspinPlayerId =
         file.sendspinPlayerId ?? `music-assistant-tui-${randomUUID()}`;
+
       if (file.sendspinPlayerId === undefined) {
         await writeConfigFile(path, { ...file, sendspinPlayerId });
       }

@@ -12,6 +12,7 @@ export function formatHeaderBar(
   titleParts: readonly string[],
 ): StyledText {
   const chunks: TextChunk[] = [];
+
   if (titleParts.length <= 1) {
     chunks.push(bold(fg(theme.accent)(titleParts[0] ?? "")));
   } else {
@@ -19,5 +20,6 @@ export function formatHeaderBar(
     chunks.push(fg(theme.fgSubtle)(" › "));
     chunks.push(bold(fg(theme.accent)(titleParts.at(-1) ?? "")));
   }
+
   return new StyledText(chunks);
 }

@@ -1,18 +1,23 @@
 import { Schema } from "effect";
 
 export const ProtocolVersion = Schema.Literal(1);
+
 export const Identity = Schema.String.pipe(
   Schema.check(Schema.isPattern(/^[A-Za-z0-9_-]{43}$/)),
   Schema.brand("SendspinIdentity"),
 );
+
 export const NoiseSuite = Schema.Literals([
   "25519_ChaChaPoly_SHA256",
   "25519_AESGCM_SHA256",
 ]);
+
 export const Role = Schema.String.pipe(
   Schema.check(Schema.isPattern(/^[a-z]+@v[1-9][0-9]*$/)),
 );
+
 export const Activity = Schema.Literals(["playback", "pairing", "management"]);
+
 export const TrustLevel = Schema.Literals(["user", "none"]);
 
 export const Envelope = <Type extends Schema.Top, Payload extends Schema.Top>(
@@ -25,6 +30,7 @@ export const ClientInitPayload = Schema.Struct({
   version: ProtocolVersion,
   suite: NoiseSuite,
 });
+
 export const ClientInit = Envelope(
   Schema.Literal("client/init"),
   ClientInitPayload,
@@ -34,12 +40,14 @@ export const ServerInitPayload = Schema.Struct({
   server_id: Identity,
   version: ProtocolVersion,
 });
+
 export const ServerInit = Envelope(
   Schema.Literal("server/init"),
   ServerInitPayload,
 );
 
 export const ServerHelloPayload = Schema.Struct({ name: Schema.String });
+
 export const ServerHello = Envelope(
   Schema.Literal("server/hello"),
   ServerHelloPayload,
@@ -63,6 +71,7 @@ export const ClientHelloPayload = Schema.Struct({
   supported_roles: Schema.Array(Role),
   unpaired_access: Schema.Struct({ enabled: Schema.Boolean }),
 });
+
 export const ClientHello = Envelope(
   Schema.Literal("client/hello"),
   ClientHelloPayload,
@@ -75,13 +84,16 @@ export const ServerActivatePayload = Schema.Struct({
     Schema.Literals(["dynamic_pin", "pairing_psk", "static_pin"]),
   ),
 });
+
 export const ServerActivate = Envelope(
   Schema.Literal("server/activate"),
   ServerActivatePayload,
 );
 
 const NullableString = Schema.NullOr(Schema.String);
+
 const NullableNumber = Schema.NullOr(Schema.Finite);
+
 export const MetadataState = Schema.Struct({
   timestamp: Schema.optionalKey(Schema.Finite),
   title: Schema.optionalKey(NullableString),
@@ -91,6 +103,7 @@ export const MetadataState = Schema.Struct({
   duration: Schema.optionalKey(NullableNumber),
   position: Schema.optionalKey(NullableNumber),
 });
+
 export interface MetadataState extends Schema.Schema.Type<
   typeof MetadataState
 > {}
@@ -106,6 +119,7 @@ export const ControllerState = Schema.Struct({
   repeat: Schema.optionalKey(NullableString),
   shuffle: Schema.optionalKey(Schema.NullOr(Schema.Boolean)),
 });
+
 export interface ControllerState extends Schema.Schema.Type<
   typeof ControllerState
 > {}
@@ -114,6 +128,7 @@ export const ServerStatePayload = Schema.Struct({
   metadata: Schema.optionalKey(Schema.NullOr(MetadataState)),
   controller: Schema.optionalKey(Schema.NullOr(ControllerState)),
 });
+
 export const ServerState = Envelope(
   Schema.Literal("server/state"),
   ServerStatePayload,

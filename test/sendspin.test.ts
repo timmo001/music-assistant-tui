@@ -1,12 +1,17 @@
 import { describe, expect, test } from "bun:test";
 import { Effect } from "effect";
-import { applyMetadataPatch, decodeEnvelope } from "../src/sendspin/index.js";
+import {
+  applyControllerPatch,
+  applyMetadataPatch,
+  decodeEnvelope,
+} from "../src/sendspin/index.js";
 
 describe("Sendspin protocol", () => {
   test("decodes a version 1 server hello", async () => {
     const message = await Effect.runPromise(
       decodeEnvelope({ type: "server/hello", payload: { name: "Server" } }),
     );
+
     expect(message.type).toBe("server/hello");
   });
 
@@ -21,6 +26,7 @@ describe("Sendspin protocol", () => {
         },
       }),
     );
+
     expect(exit._tag).toBe("Failure");
   });
 
@@ -29,5 +35,17 @@ describe("Sendspin protocol", () => {
       applyMetadataPatch({ title: "Track", artist: "Artist" }, { title: null }),
     ).toEqual({ artist: "Artist" });
     expect(applyMetadataPatch({ title: "Track" }, null)).toBeNull();
+  });
+
+  test("creates partial state and preserves false and zero values", () => {
+    expect(applyMetadataPatch(null, { title: "Track", artist: null })).toEqual({
+      title: "Track",
+    });
+    expect(
+      applyControllerPatch(
+        { volume: 30, muted: true, repeat: "all" },
+        { volume: 0, muted: false, repeat: null, shuffle: undefined },
+      ),
+    ).toEqual({ volume: 0, muted: false });
   });
 });

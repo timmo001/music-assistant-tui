@@ -6,7 +6,7 @@ import { buildMenu } from "../src/menu.js";
 import { DEFAULT_THEME } from "../src/theme.js";
 import { App } from "../src/tui/App.js";
 import { projectPlayer } from "../src/player.js";
-import { Player } from "../src/music-assistant/models.js";
+import { Player, type CommandMessage } from "../src/music-assistant/models.js";
 import { PlayerView } from "../src/tui/PlayerView.js";
 
 const serverInfo = {
@@ -45,6 +45,7 @@ test("renders connection and audio status", async () => {
     width: 80,
     height: 24,
   });
+
   try {
     const app = new App(renderer, DEFAULT_THEME, en, buildMenu(en));
     app.updatePlayer(
@@ -71,6 +72,7 @@ test("renders a wide now-playing layout with artwork and next track", async () =
     width: 90,
     height: 24,
   });
+
   try {
     const artwork = new StyledText([
       {
@@ -78,6 +80,7 @@ test("renders a wide now-playing layout with artwork and next track", async () =
         text: Array.from({ length: 7 }, () => "A".repeat(16)).join("\n"),
       } satisfies TextChunk,
     ]);
+
     const view = new PlayerView(
       renderer,
       DEFAULT_THEME,
@@ -85,6 +88,7 @@ test("renders a wide now-playing layout with artwork and next track", async () =
       [],
       async () => artwork,
     );
+
     view.update({
       connection: { type: "authenticated", server: serverInfo },
       process: { type: "running", pid: 123 },
@@ -148,6 +152,7 @@ test("renders a wide now-playing layout with artwork and next track", async () =
 test("switches from wide artwork to the compact player layout", async () => {
   const { renderer, renderOnce, captureCharFrame, resize } =
     await createTestRenderer({ width: 90, height: 24 });
+
   try {
     const view = new PlayerView(renderer, DEFAULT_THEME, en, []);
     view.update({
@@ -177,7 +182,9 @@ test("switches from wide artwork to the compact player layout", async () => {
 test("collects connection settings during first-run setup", async () => {
   const { renderer, mockInput, renderOnce, captureCharFrame } =
     await createTestRenderer({ width: 80, height: 24 });
+
   let submitted: unknown;
+
   try {
     new App(
       renderer,
@@ -222,7 +229,9 @@ test("routes Ctrl+C through graceful app shutdown", async () => {
     width: 80,
     height: 24,
   });
+
   let quit = false;
+
   try {
     new App(
       renderer,
@@ -247,7 +256,9 @@ test("routes Ctrl+C through graceful app shutdown", async () => {
 test("changes the player name from settings", async () => {
   const { renderer, mockInput, renderOnce, captureCharFrame } =
     await createTestRenderer({ width: 80, height: 24 });
+
   let playerName = "";
+
   try {
     new App(
       renderer,
@@ -290,12 +301,14 @@ test("changes the player name from settings", async () => {
 test("applies consecutive volume and mute controls optimistically", async () => {
   const { renderer, mockInput, renderOnce, captureCharFrame } =
     await createTestRenderer({ width: 80, height: 24 });
+
   const commands: Array<{
     command: string;
-    args: Readonly<Record<string, unknown>>;
+    args: NonNullable<CommandMessage["args"]>;
   }> = [];
+
   try {
-    const app = new App(
+    new App(
       renderer,
       DEFAULT_THEME,
       en,

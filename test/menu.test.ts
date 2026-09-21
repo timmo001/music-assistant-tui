@@ -17,4 +17,20 @@ describe("menu", () => {
       twoPhaseSearch(items, "bjork", (item) => [item.name], ["name"]),
     ).toEqual([{ name: "Björk" }]);
   });
+
+  test("fuzzy multi-term search accepts weighted keys", () => {
+    const items = [
+      { name: "Music Assistant", description: "Terminal player" },
+      { name: "Settings", description: "Configuration" },
+    ];
+
+    expect(
+      twoPhaseSearch(
+        items,
+        "Assistent Terminol",
+        (item) => [item.name, item.description],
+        [{ name: "name", weight: 2 }, "description"],
+      ),
+    ).toEqual([items[0]]);
+  });
 });

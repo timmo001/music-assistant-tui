@@ -14,6 +14,7 @@ const startServer = () => {
     port: 0,
     fetch(request, server) {
       if (server.upgrade(request)) return;
+
       return new Response("upgrade required", { status: 426 });
     },
     websocket: {
@@ -37,6 +38,7 @@ const startServer = () => {
       },
       message(socket, raw) {
         const command = JSON.parse(String(raw));
+
         if (command.command === "streamed") {
           socket.send(
             JSON.stringify({
@@ -51,8 +53,10 @@ const startServer = () => {
               result: ["second"],
             }),
           );
+
           return;
         }
+
         socket.send(
           JSON.stringify({
             message_id: command.message_id,
@@ -68,7 +72,9 @@ const startServer = () => {
       },
     },
   });
+
   servers.push(server);
+
   return `http://127.0.0.1:${server.port}`;
 };
 
@@ -81,8 +87,10 @@ describe("Music Assistant client", () => {
             serverUrl: startServer(),
             token: "token",
           });
+
           const snapshot = yield* SubscriptionRef.get(client.state);
           const streamed = yield* client.command("streamed");
+
           return { snapshot, streamed };
         }),
       ),

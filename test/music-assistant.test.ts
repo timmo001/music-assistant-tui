@@ -3,6 +3,7 @@ import { Effect } from "effect";
 import {
   accumulatePartialResult,
   classifyMessage,
+  createCommandMessage,
   MessageId,
   normalizeBaseUrl,
   toWebSocketUrl,
@@ -22,6 +23,7 @@ describe("Music Assistant protocol", () => {
     const result = await Effect.runPromise(
       classifyMessage({ message_id: "1", error_code: 2, details: "nope" }),
     );
+
     expect(result.type).toBe("error");
   });
 
@@ -34,4 +36,41 @@ describe("Music Assistant protocol", () => {
       }),
     ).toEqual(["a", "b"]);
   });
+
+  test("preserves omitted command arguments and nested JSON payloads", () => {
+    const id = MessageId.make("1");
+
+    expect(createCommandMessage(id, "players/all")).toEqual({
+      message_id: id,
+      command: "players/all",
+    });
+    expect(
+      createCommandMessage(id, "custom", {
+        enabled: true,
+        selection: { items: [1, "track", null] },
+      }).args,
+    ).toEqual({ enabled: true, selection: { items: [1, "track", null] } });
+  });
+
+  test.each(
+    [null, false, 0, "ok", [1, null], { nested: [true, "value"] }].map(
+      (result) => ({ result }),
+    ),
+  )("classifies JSON command result %j", async ({ result }) => {
+    expect(
+      await Effect.runPromise(classifyMessage({ message_id: "1", result })),
+    ).toEqual({
+      type: "success",
+      value: { message_id: MessageId.make("1"), result },
+    });
+  });
+
+  test.each([null, "invalid", { event: 1, message_id: "1", result: true }])(
+    "rejects malformed messages without reclassifying them: %j",
+    async (message) => {
+      const exit = await Effect.runPromiseExit(classifyMessage(message));
+
+      expect(exit._tag).toBe("Failure");
+    },
+  );
 });

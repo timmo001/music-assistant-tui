@@ -125,6 +125,7 @@ export class SetupView {
 
   setVisible(visible: boolean): void {
     this.root.visible = visible;
+
     if (visible) this.resetAndFocus();
     else {
       this.serverUrlInput.blur();
@@ -134,12 +135,15 @@ export class SetupView {
 
   handleKeyPress(key: KeyEvent): boolean {
     if (this.submitting) return true;
+
     if (key.name === "tab") {
       this.activeField =
         this.activeField === "serverUrl" ? "token" : "serverUrl";
       this.updateFocus();
+
       return true;
     }
+
     return false;
   }
 
@@ -151,6 +155,7 @@ export class SetupView {
 
   private updateFocus(): void {
     const serverUrlActive = this.activeField === "serverUrl";
+
     if (serverUrlActive) {
       this.serverUrlInput.focus();
       this.tokenInput.blur();
@@ -158,6 +163,7 @@ export class SetupView {
       this.serverUrlInput.blur();
       this.tokenInput.focus();
     }
+
     this.serverUrlLabel.content = t`${fg(serverUrlActive ? this.theme.accent : this.theme.fgMuted)(this.strings.setup.urlLabel)}`;
     this.tokenLabel.content = t`${fg(serverUrlActive ? this.theme.fgMuted : this.theme.accent)(this.strings.setup.tokenLabel)}`;
   }
@@ -165,23 +171,28 @@ export class SetupView {
   private submit(): void {
     const serverUrl = this.serverUrlInput.value.trim();
     const token = this.tokenInput.value.trim();
+
     if (!token) {
       this.status.content = t`${fg(this.theme.red)(this.strings.setup.tokenRequired)}`;
+
       return;
     }
+
     if (serverUrl) {
       try {
         const url = new URL(serverUrl);
+
         if (url.protocol !== "http:" && url.protocol !== "https:") throw url;
       } catch {
         this.status.content = t`${fg(this.theme.red)(this.strings.setup.urlInvalid)}`;
+
         return;
       }
     }
 
     this.submitting = true;
     this.status.content = t`${fg(this.theme.yellow)(this.strings.setup.saving)}`;
-    this.options.onSubmit({ ...(serverUrl ? { serverUrl } : {}), token }).then(
+    this.options.onSubmit(serverUrl ? { serverUrl, token } : { token }).then(
       () => {
         this.submitting = false;
         this.status.content = "";

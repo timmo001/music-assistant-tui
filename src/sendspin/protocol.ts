@@ -1,4 +1,4 @@
-import { Effect, Schema } from "effect";
+import { Schema } from "effect";
 import {
   ClientHello,
   ClientInit,
@@ -18,35 +18,37 @@ export const AnyEnvelope = Schema.Union([
   ServerActivate,
   ServerState,
 ]);
+
 export type AnyEnvelope = typeof AnyEnvelope.Type;
 
-export const decodeEnvelope = Effect.fn("Sendspin.decodeEnvelope")(function* (
-  input: unknown,
-) {
-  return yield* Schema.decodeUnknownEffect(AnyEnvelope)(input);
-});
+export const decodeEnvelope = Schema.decodeUnknownEffect(AnyEnvelope);
 
 export const encodeEnvelope = Schema.encodeUnknownEffect(AnyEnvelope);
 
-export const applyStatePatch = <T extends Readonly<Record<string, unknown>>>(
-  current: T | null,
+export const applyStatePatch = <T extends object>(
+  current: Partial<T> | null,
   patch: Partial<{ readonly [K in keyof T]: T[K] | null }> | null,
-): T | null => {
+): Partial<T> | null => {
   if (patch === null) return null;
-  const next: Record<string, unknown> = { ...(current ?? {}) };
-  for (const [key, value] of Object.entries(patch)) {
+  const next: Partial<T> = { ...current };
+
+  for (const key in patch) {
+    if (!Object.hasOwn(patch, key)) continue;
+    const value = patch[key];
+
     if (value === null) delete next[key];
     else if (value !== undefined) next[key] = value;
   }
-  return next as T;
+
+  return next;
 };
 
 export const applyMetadataPatch = (
   current: MetadataState | null,
   patch: Partial<MetadataState> | null,
-): MetadataState | null => applyStatePatch(current, patch);
+): MetadataState | null => applyStatePatch<MetadataState>(current, patch);
 
 export const applyControllerPatch = (
   current: ControllerState | null,
   patch: Partial<ControllerState> | null,
-): ControllerState | null => applyStatePatch(current, patch);
+): ControllerState | null => applyStatePatch<ControllerState>(current, patch);

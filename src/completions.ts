@@ -1,10 +1,13 @@
 const shells = ["bash", "fish", "zsh"] as const;
+
 export type CompletionShell = (typeof shells)[number];
 
 export function parseCompletionShell(args: readonly string[]): CompletionShell {
   const shell = args.find((arg) => !arg.startsWith("-")) ?? "zsh";
-  if (shells.some((candidate) => candidate === shell))
-    return shell as CompletionShell;
+
+  const supportedShell = shells.find((candidate) => candidate === shell);
+
+  if (supportedShell !== undefined) return supportedShell;
   throw new Error(
     `Unsupported shell '${shell}' (expected: ${shells.join(", ")})`,
   );

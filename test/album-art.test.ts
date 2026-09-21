@@ -9,9 +9,11 @@ import {
 
 const bitmap = (pixel: readonly [number, number, number, number]) => {
   const data = new Uint8Array(ALBUM_ART_WIDTH * ALBUM_ART_HEIGHT * 2 * 4);
+
   for (let offset = 0; offset < data.length; offset += 4) {
     data.set(pixel, offset);
   }
+
   return {
     width: ALBUM_ART_WIDTH,
     height: ALBUM_ART_HEIGHT * 2,

@@ -21,6 +21,7 @@ describe("configuration", () => {
   test("creates a persistent player id and applies environment overrides", async () => {
     const root = await mkdtemp(join(tmpdir(), "ma-tui-config-"));
     directories.push(root);
+
     const env = {
       XDG_CONFIG_HOME: root,
       MUSIC_ASSISTANT_URL: "http://music.local:8095",
@@ -40,6 +41,7 @@ describe("configuration", () => {
   test("saves a custom player name", async () => {
     const root = await mkdtemp(join(tmpdir(), "ma-tui-config-"));
     directories.push(root);
+
     const config = await Effect.runPromise(
       loadConfig({ XDG_CONFIG_HOME: root }),
     );
@@ -64,12 +66,14 @@ describe("configuration", () => {
     const result = await Effect.runPromiseExit(
       loadConfig({ XDG_CONFIG_HOME: root }),
     );
+
     expect(result._tag).toBe("Failure");
   });
 
   test("saves connection settings without replacing player configuration", async () => {
     const root = await mkdtemp(join(tmpdir(), "ma-tui-config-"));
     directories.push(root);
+
     const config = await Effect.runPromise(
       loadConfig({ XDG_CONFIG_HOME: root }),
     );

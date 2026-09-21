@@ -65,6 +65,11 @@ description = "Type-check the music-assistant-tui source"
 depends = ["install"]
 run = "bun run typecheck"
 
+[tasks.lint]
+description = "Lint the music-assistant-tui source"
+depends = ["install"]
+run = "bun run lint"
+
 [tasks.test]
 description = "Run the music-assistant-tui tests"
 depends = ["install"]
@@ -81,8 +86,8 @@ depends = ["install"]
 run = "bun run format:check"
 
 [tasks.check]
-description = "Check formatting, types, tests and the production build"
-depends = ["format:check", "typecheck", "test", "build", "shell:check", "package:check"]
+description = "Check formatting, lint, types, tests and the production build"
+depends = ["format:check", "lint", "typecheck", "test", "build", "shell:check", "package:check"]
 
 [tasks."shell:check"]
 description = "Check Linux packaging shell syntax"

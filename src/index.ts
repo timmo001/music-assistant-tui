@@ -37,6 +37,7 @@ if (flags.help) {
       const strings = yield* Strings;
       const theme = yield* loadTheme;
       const quit = yield* Deferred.make<void>();
+
       const renderer = yield* Effect.acquireRelease(
         Effect.promise(() =>
           createCliRenderer({
@@ -48,11 +49,13 @@ if (flags.help) {
         ),
         (renderer) => Effect.sync(() => renderer.destroy()),
       );
+
       const config = yield* loadConfig();
       const connection = yield* Deferred.make<ConnectionConfig>();
       const context = yield* Effect.context<never>();
       let restartPlayer: ((playerName: string) => Promise<void>) | undefined;
       const needsSetup = config.token === undefined;
+
       const app = new App(
         renderer,
         theme,
@@ -81,15 +84,17 @@ if (flags.help) {
           },
         },
       );
+
       renderer.start();
 
       const configuredConnection = needsSetup
         ? yield* Deferred.await(connection)
-        : {
-            ...(config.serverUrl ? { serverUrl: config.serverUrl } : {}),
-            token: config.token,
-          };
+        : config.serverUrl
+          ? { serverUrl: config.serverUrl, token: config.token }
+          : { token: config.token };
+
       if (needsSetup) app.showPlayer();
+
       const discovered = configuredConnection.serverUrl
         ? []
         : yield* discoverServers().pipe(
@@ -97,6 +102,7 @@ if (flags.help) {
               Effect.logWarning(error.message).pipe(Effect.as([])),
             ),
           );
+
       const serverUrl = yield* selectServer(
         configuredConnection.serverUrl,
         discovered,
@@ -106,6 +112,7 @@ if (flags.help) {
         serverUrl,
         token: configuredConnection.token,
       });
+
       const sendspin = yield* SendspinProcess.make(config.sendspinBinary);
       yield* sendspin
         .start({
@@ -134,10 +141,12 @@ if (flags.help) {
 
       let musicState = yield* SubscriptionRef.get(musicAssistant.state);
       let processState = yield* SubscriptionRef.get(sendspin.status);
+
       const renderPlayer = () =>
         app.updatePlayer(
           projectPlayer(musicState, processState, config.sendspinPlayerId),
         );
+
       app.updatePlayer(
         projectPlayer(musicState, processState, config.sendspinPlayerId),
       );
@@ -175,6 +184,7 @@ if (flags.help) {
             ),
         );
       });
+
       return yield* Deferred.await(quit);
     }),
   );

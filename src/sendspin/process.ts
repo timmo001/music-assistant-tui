@@ -47,11 +47,13 @@ const commandExists = async (command: string): Promise<boolean> => {
   if (command.includes("/")) {
     try {
       await access(command, constants.X_OK);
+
       return true;
     } catch {
       return false;
     }
   }
+
   const result = Bun.spawnSync(
     ["sh", "-c", 'command -v -- "$1"', "sh", command],
     {
@@ -59,6 +61,7 @@ const commandExists = async (command: string): Promise<boolean> => {
       stderr: "ignore",
     },
   );
+
   return result.exitCode === 0;
 };
 
@@ -69,15 +72,18 @@ export const resolveBinary = async (configured?: string): Promise<string> => {
     join(process.cwd(), "dist", "sendspin-rs-cli"),
     "sendspin-rs-cli",
   ].filter((candidate): candidate is string => candidate !== undefined);
+
   for (const candidate of candidates) {
     if (await commandExists(candidate)) return candidate;
   }
+
   throw new Error("sendspin-rs-cli was not found; set SENDSPIN_PLAYER_BINARY");
 };
 
 export const sendspinAddress = (serverUrl: string): string => {
   const url = new URL(serverUrl);
   const host = url.hostname.includes(":") ? `[${url.hostname}]` : url.hostname;
+
   return `${host}:8927`;
 };
 
@@ -89,6 +95,7 @@ export const make = (
     const status = yield* SubscriptionRef.make<ProcessStatus>({
       type: "stopped",
     });
+
     const context = yield* Effect.context<never>();
     let process: Bun.Subprocess<"ignore", "ignore", number> | undefined;
 
@@ -96,15 +103,19 @@ export const make = (
       if (process !== undefined) {
         const child = process;
         process = undefined;
+
         if (child.exitCode === null) child.kill("SIGTERM");
         const exited = awaitWithin(child.exited, 2000);
+
         if (!(yield* Effect.promise(() => exited))) {
           if (child.exitCode === null) child.kill("SIGKILL");
           yield* Effect.promise(() => awaitWithin(child.exited, 1000));
         }
       }
+
       yield* SubscriptionRef.set(status, { type: "stopped" });
     });
+
     yield* Effect.addFinalizer(() => stop);
 
     const start = Effect.fn("SendspinProcess.start")(function* (
@@ -112,6 +123,7 @@ export const make = (
     ) {
       if (process !== undefined && process.exitCode === null) return;
       yield* SubscriptionRef.set(status, { type: "starting" });
+
       const binary = yield* Effect.tryPromise({
         try: () => resolveBinary(configuredBinary),
         catch: (error) =>
@@ -123,10 +135,13 @@ export const make = (
           SubscriptionRef.set(status, { type: "exited", code: 127 }),
         ),
       );
+
       const version = Bun.spawnSync([binary, "--version"]);
       const output = new TextDecoder().decode(version.stdout).trim();
+
       if (version.exitCode !== 0 || !output.includes(SUPPORTED_VERSION)) {
         yield* SubscriptionRef.set(status, { type: "exited", code: 126 });
+
         return yield* new SendspinProcessError({
           message: `Expected sendspin-rs-cli ${SUPPORTED_VERSION}, received '${output}'`,
         });
@@ -135,6 +150,7 @@ export const make = (
       const logPath = join(stateHome, "music-assistant-tui", "sendspin.log");
       yield* Effect.promise(() => mkdir(dirname(logPath), { recursive: true }));
       const log = yield* Effect.promise(() => open(logPath, "a"));
+
       const child = yield* Effect.try({
         try: () =>
           Bun.spawn(
@@ -161,10 +177,12 @@ export const make = (
           SubscriptionRef.set(status, { type: "exited", code: 127 }),
         ),
       );
+
       process = child;
       yield* SubscriptionRef.set(status, { type: "running", pid: child.pid });
       void child.exited.then(async (code) => {
         await log.close();
+
         if (process === child) {
           process = undefined;
           Effect.runForkWith(context)(

@@ -14,9 +14,13 @@ import { loadAlbumArt } from "./albumArt.js";
 import { formatHelpBar, globalHelp, type HelpEntry } from "./helpBar.js";
 
 const WIDE_MIN_COLUMNS = 72;
+
 const WIDE_MIN_ROWS = 18;
+
 const MIN_COLUMNS = 40;
+
 const MIN_ROWS = 10;
+
 const ARTWORK_PLACEHOLDER = [
   "                ",
   "       ♪        ",
@@ -37,6 +41,7 @@ const formatTime = (seconds: number | null | undefined): string => {
   if (seconds === null || seconds === undefined || !Number.isFinite(seconds))
     return "LIVE";
   const value = Math.max(0, Math.floor(seconds));
+
   return `${Math.floor(value / 60)
     .toString()
     .padStart(2, "0")}:${(value % 60).toString().padStart(2, "0")}`;
@@ -48,22 +53,28 @@ const progressBar = (
   width: number,
 ): string => {
   const safeWidth = Math.max(10, width);
+
   if (duration === null || duration === undefined || duration <= 0)
     return "─".repeat(safeWidth);
+
   const filled = Math.round(
     Math.min(1, Math.max(0, elapsed / duration)) * safeWidth,
   );
+
   return `${"━".repeat(filled)}${"─".repeat(safeWidth - filled)}`;
 };
 
 const statusLabel = (projection: PlayerProjection): string => {
   if (projection.connection.type !== "authenticated")
     return projection.connection.type;
+
   if (projection.process.type !== "running")
     return `audio ${projection.process.type}`;
   const playback = projection.player?.playback_state ?? "stopped";
   const volume = projection.player?.volume_level;
+
   if (projection.player?.volume_muted) return `${playback} · muted`;
+
   return volume === null || volume === undefined
     ? playback
     : `${playback} · volume ${volume}%`;
@@ -234,8 +245,10 @@ export class PlayerView {
 
   private renderProjection() {
     const projection = this.projection;
+
     const tooSmall =
       this.renderer.width < MIN_COLUMNS || this.renderer.height < MIN_ROWS;
+
     this.identity.visible = !tooSmall;
     this.timeline.visible = !tooSmall;
     this.queue.visible = !tooSmall;
@@ -250,6 +263,7 @@ export class PlayerView {
     this.track.content = tooSmall
       ? this.strings.app.terminalTooSmall
       : t`${bold(fg(this.theme.fg)(projection.title || this.strings.app.nothingPlaying))}`;
+
     if (tooSmall) return;
 
     this.identity.content = t`${bold(fg(this.theme.accent)(projection.player?.name ?? this.strings.app.name))}`;
@@ -263,6 +277,7 @@ export class PlayerView {
       ? t`${bold(fg(this.theme.fgSubtle)(this.strings.player.upNext))}  ${fg(this.theme.fgMuted)(projection.queue.next_item.name)}`
       : "";
     this.status.content = t`${fg(projection.connection.type === "disconnected" || projection.process.type === "exited" ? this.theme.red : this.theme.fgSubtle)(statusLabel(projection))}`;
+
     if (!this.isWide) {
       this.details.content = t`${fg(this.theme.fgMuted)(
         [projection.artist, projection.album, statusLabel(projection)]
@@ -278,12 +293,16 @@ export class PlayerView {
     this.artworkRequest?.abort();
     this.artworkRequest = undefined;
     this.artwork.content = t`${fg(this.theme.fgGhost)(ARTWORK_PLACEHOLDER)}`;
+
     if (!url) return;
     const cached = this.artworkCache.get(url);
+
     if (cached) {
       this.artwork.content = cached;
+
       return;
     }
+
     const request = new AbortController();
     const generation = ++this.artworkGeneration;
     this.artworkRequest = request;
@@ -292,10 +311,13 @@ export class PlayerView {
         if (request.signal.aborted || generation !== this.artworkGeneration)
           return;
         this.artworkCache.set(url, artwork);
+
         if (this.artworkCache.size > 8) {
           const oldestUrl = this.artworkCache.keys().next().value;
+
           if (oldestUrl !== undefined) this.artworkCache.delete(oldestUrl);
         }
+
         this.artwork.content = artwork;
       })
       .catch(() => {})

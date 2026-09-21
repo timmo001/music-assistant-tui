@@ -89,6 +89,7 @@ export class PlayerNameView {
 
   setVisible(visible: boolean): void {
     this.root.visible = visible;
+
     if (visible) {
       this.status.content = "";
       this.input.focus();
@@ -99,17 +100,22 @@ export class PlayerNameView {
 
   handleKeyPress(key: KeyEvent): boolean {
     if (this.submitting) return true;
+
     if (key.name === "escape") {
       this.options.onBack();
+
       return true;
     }
+
     return false;
   }
 
   private submit(): void {
     const name = this.input.value.trim();
+
     if (!name) {
       this.status.content = t`${fg(this.theme.red)(this.strings.playerName.required)}`;
+
       return;
     }
 

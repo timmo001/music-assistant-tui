@@ -13,7 +13,10 @@ interface PlayerCommandSpec {
   readonly label: keyof Locale["help"];
   readonly command: (projection: PlayerProjection) => {
     readonly name: string;
-    readonly args: Readonly<Record<string, unknown>>;
+    readonly args: {
+      readonly player_id: string;
+      readonly volume_level?: number;
+    };
   } | null;
 }
 
@@ -27,8 +30,10 @@ const adjustedVolume = (
   direction: -1 | 1,
 ) => {
   const current = volume ?? 30;
+
   const step =
     current < 10 || current > 90 ? 1 : current < 30 || current > 70 ? 2 : 3;
+
   return Math.max(0, Math.min(100, current + direction * step));
 };
 
@@ -40,6 +45,7 @@ export const playerCommands: readonly PlayerCommandSpec[] = [
     label: "playPause",
     command: (projection) => {
       const args = playerArgs(projection);
+
       return args === null ? null : { name: "players/cmd/play_pause", args };
     },
   },
@@ -50,6 +56,7 @@ export const playerCommands: readonly PlayerCommandSpec[] = [
     label: "previous",
     command: (projection) => {
       const args = playerArgs(projection);
+
       return args === null ? null : { name: "players/cmd/previous", args };
     },
   },
@@ -60,6 +67,7 @@ export const playerCommands: readonly PlayerCommandSpec[] = [
     label: "next",
     command: (projection) => {
       const args = playerArgs(projection);
+
       return args === null ? null : { name: "players/cmd/next", args };
     },
   },
@@ -70,6 +78,7 @@ export const playerCommands: readonly PlayerCommandSpec[] = [
     label: "volumeDown",
     command: (projection) => {
       const args = playerArgs(projection);
+
       return args === null
         ? null
         : {
@@ -88,6 +97,7 @@ export const playerCommands: readonly PlayerCommandSpec[] = [
     label: "volumeUp",
     command: (projection) => {
       const args = playerArgs(projection);
+
       return args === null
         ? null
         : {
@@ -106,6 +116,7 @@ export const playerCommands: readonly PlayerCommandSpec[] = [
     label: "mute",
     command: (projection) => {
       const args = playerArgs(projection);
+
       return args === null
         ? null
         : {
@@ -139,7 +150,9 @@ export const playerCommandForKey = (
         return "-";
     }
   })();
+
   const value = key.name === "space" ? "space" : key.sequence || namedValue;
+
   return playerCommands
     .find((command) =>
       value === undefined ? false : command.keys.includes(value),

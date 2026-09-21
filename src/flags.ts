@@ -7,6 +7,7 @@ export interface Flags {
 
 export function parseFlags(args: readonly string[]): Flags {
   const command = args.find((arg) => !arg.startsWith("-"));
+
   return {
     initialView: command === "menu" ? "menu" : "player",
     help: args.includes("--help") || args.includes("-h"),
