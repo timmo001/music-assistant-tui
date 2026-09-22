@@ -23,7 +23,7 @@ export const ServerInfo = Schema.Struct({
   has_remote_access: Schema.Boolean,
 });
 
-export interface ServerInfo extends Schema.Schema.Type<typeof ServerInfo> {}
+export type ServerInfo = typeof ServerInfo.Type;
 
 export const MediaItemImage = Schema.Struct({
   type: Schema.String,
@@ -89,7 +89,7 @@ export const Player = Schema.Struct({
   current_media: Schema.optionalKey(Schema.NullOr(PlayerMedia)),
 });
 
-export interface Player extends Schema.Schema.Type<typeof Player> {}
+export type Player = typeof Player.Type;
 
 export const QueueItem = Schema.Struct({
   queue_id: Schema.String,
@@ -122,7 +122,7 @@ export const PlayerQueue = Schema.Struct({
   next_item: Schema.optionalKey(Schema.NullOr(QueueItem)),
 });
 
-export interface PlayerQueue extends Schema.Schema.Type<typeof PlayerQueue> {}
+export type PlayerQueue = typeof PlayerQueue.Type;
 
 export const CommandMessage = Schema.Struct({
   message_id: MessageId,
@@ -130,9 +130,7 @@ export const CommandMessage = Schema.Struct({
   args: Schema.optionalKey(Schema.NullOr(Schema.JsonObject)),
 });
 
-export interface CommandMessage extends Schema.Schema.Type<
-  typeof CommandMessage
-> {}
+export type CommandMessage = typeof CommandMessage.Type;
 
 export const SuccessResultMessage = Schema.Struct({
   message_id: MessageId,

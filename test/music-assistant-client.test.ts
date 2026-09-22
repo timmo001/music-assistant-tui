@@ -5,8 +5,8 @@ import { Player } from "../src/music-assistant/models.js";
 
 const servers: Bun.Server<undefined>[] = [];
 
-afterEach(() => {
-  for (const server of servers.splice(0)) server.stop(true);
+afterEach(async () => {
+  await Promise.all(servers.splice(0).map((server) => server.stop(true)));
 });
 
 const startServer = () => {

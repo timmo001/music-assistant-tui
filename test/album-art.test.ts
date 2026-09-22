@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { rejects } from "node:assert/strict";
 import { RGBA } from "@opentui/core";
 import {
   ALBUM_ART_HEIGHT,
@@ -50,16 +51,18 @@ describe("album art", () => {
   });
 
   test("rejects failed and oversized responses", async () => {
-    await expect(
+    await rejects(
       loadAlbumArt("https://example.com/art.jpg", "#000000", {
         fetch: async () => new Response(null, { status: 404 }),
       }),
-    ).rejects.toThrow("404");
-    await expect(
+      /404/,
+    );
+    await rejects(
       loadAlbumArt("https://example.com/art.jpg", "#000000", {
         maxBytes: 4,
         fetch: async () => new Response(new Uint8Array(5)),
       }),
-    ).rejects.toThrow("download limit");
+      /download limit/,
+    );
   });
 });
