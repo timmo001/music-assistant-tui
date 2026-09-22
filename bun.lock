@@ -14,7 +14,7 @@
       "devDependencies": {
         "@effect/tsgo": "^0.45.0",
         "@oxlint/plugins": "1.85.0",
-        "@timmo001/oxlint-rules": "0.3.5",
+        "@timmo001/oxlint-rules": "0.3.6",
         "@types/bun": "^1.4.2",
         "@types/multicast-dns": "7.2.4",
         "oxlint": "1.85.0",
@@ -171,7 +171,7 @@
 
     "@oxlint/plugins": ["@oxlint/plugins@1.85.0", "", {}, "sha512-qqHqML3ME3cxGgFvWJG8wwMnJc9ol5SMdtqkq0k8r7l0USmC+HRXYjzDacME4Dqkx4yqrUsBhj0JYvji8fHxJQ=="],
 
-    "@timmo001/oxlint-rules": ["@timmo001/oxlint-rules@0.3.5", "", { "peerDependencies": { "@oxlint/plugins": "1.83.0", "oxlint": "1.83.0" }, "bin": { "oxlint-rules": "dist/cli.js" } }, "sha512-eaJ9Cn5/9kaiMG80tB2i4dleRhsv691oU0/fkqvPwn08pF0c03traYeoGeIeTR32fFBrSloABVX7/IHtW9AqzQ=="],
+    "@timmo001/oxlint-rules": ["@timmo001/oxlint-rules@0.3.6", "", { "peerDependencies": { "@oxlint/plugins": "1.85.0", "oxlint": "1.85.0" }, "bin": { "oxlint-rules": "dist/cli.js" } }, "sha512-9fAWa2fUwo7hOgwq/BHIsoKAIxDelsAvWf0ttpDMxgRp7M70vdEshQ6RM22j9ayof2ta23yzuj6bue/hQ7pgZQ=="],
 
     "@tokenizer/inflate": ["@tokenizer/inflate@0.4.1", "", { "dependencies": { "debug": "^4.4.3", "token-types": "^6.1.1" } }, "sha512-2mAv+8pkG6GIZiF1kNg1jAjh27IDxEPKwdGul3snfztFerfPGI1LjDezZp3i7BElXompqEtPmoPx6c2wgtWsOA=="],
 
