@@ -41,7 +41,7 @@ jobs:
   publish:
     name: Publish AUR (music-assistant-tui-git)
     needs: prepare
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@010ccf64e49d2984bb5f0982d6ae7314114472a6 # master
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@ff67831f05ffa4f950a5505263207b8bb8f24369 # master
     with:
       package-name: music-assistant-tui-git
       artifact-name: >-
