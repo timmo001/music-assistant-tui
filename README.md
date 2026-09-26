@@ -16,7 +16,7 @@ mise run dev
 
 Persistent settings are read from `${XDG_CONFIG_HOME:-~/.config}/music-assistant-tui/config.json`. A token stored there requires file mode `0600`. Supported fields are `serverUrl`, `token`, `sendspinPlayerId`, `playerName`, `volume`, and `sendspinBinary`.
 
-Development playback requires `sendspin-rs-cli` on `PATH` or `SENDSPIN_PLAYER_BINARY` pointing to its v0.0.8 binary. Packaged releases install the pinned binary automatically. The player currently connects directly to port `8927`, so the Music Assistant host must be locally reachable; proxy-only remote playback is not yet available.
+Development playback requires `sendspin-rs-cli` on `PATH` or `SENDSPIN_PLAYER_BINARY` pointing to its v0.0.9 binary. Packaged releases install the pinned binary automatically. The player currently connects directly to port `8927`, so the Music Assistant host must be locally reachable; proxy-only remote playback is not yet available.
 
 ## Run
 

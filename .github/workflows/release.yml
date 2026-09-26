@@ -49,7 +49,7 @@ jobs:
         esac
         curl --fail --location --silent --show-error \
           --output dist/release/root/sendspin-rs-cli \
-          "https://github.com/s3than/sendspin-rs-cli/releases/download/v0.0.8/sendspin-rs-cli-linux-$sendspin_arch"
+          "https://github.com/s3than/sendspin-rs-cli/releases/download/v0.0.9/sendspin-rs-cli-linux-$sendspin_arch"
         printf '%s  %s\n' "$sendspin_sha" dist/release/root/sendspin-rs-cli \
           | sha256sum --check --strict
         chmod 0755 dist/release/root/sendspin-rs-cli
