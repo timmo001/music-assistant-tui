@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@opentui/core": "^0.5.12",
-    "effect": "4.0.0-rc.117",
+    "effect": "4.0.0-rc.118",
     "fuse.js": "^7.5.0",
     "jimp": "1.6.1",
     "multicast-dns": "7.2.5"
