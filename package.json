@@ -17,6 +17,7 @@
     "check:package": ".scripts/linux/prepare-aur-git.sh /tmp/music-assistant-tui-aur-git && test -f /tmp/music-assistant-tui-aur-git/PKGBUILD"
   },
   "dependencies": {
+    "@effect/platform-bun": "4.0.0-rc.118",
     "@opentui/core": "^0.5.12",
     "effect": "4.0.0-rc.118",
     "fuse.js": "^7.5.0",
@@ -26,7 +27,7 @@
   "devDependencies": {
     "@effect/tsgo": "^0.47.0",
     "@oxlint/plugins": "1.86.0",
-    "@timmo001/oxlint-rules": "0.4.0",
+    "@timmo001/oxlint-rules": "0.5.0",
     "@types/bun": "^1.4.2",
     "@types/multicast-dns": "7.2.4",
     "oxlint": "1.86.0",

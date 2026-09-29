@@ -1,5 +1,12 @@
 import { createCliRenderer } from "@opentui/core";
-import { Deferred, Effect, Stream, SubscriptionRef } from "effect";
+import { BunServices } from "@effect/platform-bun";
+import {
+  Deferred,
+  Effect,
+  type FileSystem,
+  Stream,
+  SubscriptionRef,
+} from "effect";
 import { renderCompletions, parseCompletionShell } from "./completions.js";
 import {
   type ConnectionConfig,
@@ -50,9 +57,9 @@ if (flags.help) {
         (renderer) => Effect.sync(() => renderer.destroy()),
       );
 
-      const config = yield* loadConfig();
+      const config = yield* loadConfig(process.env);
       const connection = yield* Deferred.make<ConnectionConfig>();
-      const context = yield* Effect.context<never>();
+      const context = yield* Effect.context<FileSystem.FileSystem>();
       let restartPlayer: ((playerName: string) => Promise<void>) | undefined;
       const needsSetup = config.token === undefined;
 
@@ -189,8 +196,10 @@ if (flags.help) {
     }),
   );
 
-  Effect.runPromise(program).catch((error) => {
-    console.error(error);
-    process.exitCode = 1;
-  });
+  Effect.runPromise(program.pipe(Effect.provide(BunServices.layer))).catch(
+    (error) => {
+      console.error(error);
+      process.exitCode = 1;
+    },
+  );
 }

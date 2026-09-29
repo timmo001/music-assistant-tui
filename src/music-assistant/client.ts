@@ -122,17 +122,21 @@ export const connect = (
               return;
             }
 
-            case "player_removed":
-              if (event.object_id !== undefined && event.object_id !== null) {
+            case "player_removed": {
+              const objectId = event.object_id;
+
+              if (objectId !== undefined && objectId !== null) {
                 setState((current) => {
                   const players = new Map(current.players);
-                  players.delete(event.object_id!);
+                  players.delete(objectId);
 
                   return { ...current, players };
                 });
               }
 
               return;
+            }
+
             case "queue_added":
             case "queue_updated": {
               const queue = await Schema.decodeUnknownPromise(PlayerQueue)(
@@ -149,20 +153,21 @@ export const connect = (
 
             case "queue_time_updated": {
               const elapsedTime = event.data;
+              const objectId = event.object_id;
 
               if (
-                event.object_id !== undefined &&
-                event.object_id !== null &&
-                Schema.is(Schema.Number)(elapsedTime)
+                objectId !== undefined &&
+                objectId !== null &&
+                Schema.is(Schema.Finite)(elapsedTime)
               ) {
                 setState((current) => {
-                  const queue = current.queues.get(event.object_id!);
+                  const queue = current.queues.get(objectId);
 
                   if (queue === undefined) return current;
 
                   return {
                     ...current,
-                    queues: new Map(current.queues).set(event.object_id!, {
+                    queues: new Map(current.queues).set(objectId, {
                       ...queue,
                       elapsed_time: elapsedTime,
                       elapsed_time_last_updated: Date.now() / 1000,

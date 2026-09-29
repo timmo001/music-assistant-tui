@@ -1,73 +1,74 @@
-import { afterEach, describe, expect, test } from "bun:test";
-import { chmod, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
-import { tmpdir } from "node:os";
-import { Effect, SubscriptionRef } from "effect";
+import { BunServices } from "@effect/platform-bun";
+import { Effect, FileSystem, SubscriptionRef } from "effect";
 import { SendspinProcess } from "../src/sendspin/index.js";
+import { runWithServices } from "./services.js";
 
-const directories: string[] = [];
-
-afterEach(async () => {
-  await Promise.all(
-    directories.splice(0).map((path) => rm(path, { recursive: true })),
-  );
-});
-
-describe("Sendspin process", () => {
-  test("resolves a configured helper", async () => {
-    const root = await mkdtemp(join(tmpdir(), "ma-tui-sendspin-"));
-    directories.push(root);
-    const fixture = join(root, "sendspin-rs-cli");
-    await writeFile(fixture, "#!/bin/sh\n");
-    await chmod(fixture, 0o755);
-
-    expect(await SendspinProcess.resolveBinary(fixture)).toBe(fixture);
-  });
-
-  test("passes playback configuration and owns child shutdown", async () => {
-    const root = await mkdtemp(join(tmpdir(), "ma-tui-sendspin-"));
-    directories.push(root);
-    const fixture = join(root, "sendspin-rs-cli");
-    await writeFile(
-      fixture,
-      `#!/bin/sh
+const helper = `#!/bin/sh
 if [ "$1" = "--version" ]; then
   printf 'sendspin-rs-cli 0.0.8\\n'
   exit 0
 fi
 trap 'exit 0' TERM
 while :; do sleep 1; done
-`,
+`;
+
+const fixtureIn = (contents: string) =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+
+    const root = yield* fs.makeTempDirectoryScoped({
+      prefix: "ma-tui-sendspin-",
+    });
+
+    const fixture = join(root, "sendspin-rs-cli");
+    yield* fs.writeFileString(fixture, contents);
+    yield* fs.chmod(fixture, 0o755);
+
+    return { root, fixture };
+  });
+
+describe("Sendspin process", () => {
+  test("resolves a configured helper", async () => {
+    await runWithServices(
+      Effect.gen(function* () {
+        const { fixture } = yield* fixtureIn("#!/bin/sh\n");
+
+        expect(yield* SendspinProcess.resolveBinary(fixture)).toBe(fixture);
+      }),
     );
-    await chmod(fixture, 0o755);
+  });
 
-    const result = await Effect.runPromise(
-      Effect.scoped(
-        Effect.gen(function* () {
-          const service = yield* SendspinProcess.make(fixture, root);
-          yield* service.start({
-            serverUrl: "http://127.0.0.1:8095",
-            playerId: "player-id",
-            playerName: "Terminal",
-            volume: 40,
-          });
-          yield* Effect.sleep("50 millis");
-          const running = yield* SubscriptionRef.get(service.status);
+  test("passes playback configuration and owns child shutdown", async () => {
+    const result = await runWithServices(
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+        const { root, fixture } = yield* fixtureIn(helper);
+        const service = yield* SendspinProcess.make(fixture, root);
 
-          if (running.type !== "running")
-            throw new Error("fixture did not start");
+        yield* service.start({
+          serverUrl: "http://127.0.0.1:8095",
+          playerId: "player-id",
+          playerName: "Terminal",
+          volume: 40,
+        });
+        yield* Effect.sleep("50 millis");
+        const running = yield* SubscriptionRef.get(service.status);
 
-          const commandLine = yield* Effect.promise(() =>
-            readFile(`/proc/${running.pid}/cmdline`, "utf8"),
-          );
+        if (running.type !== "running")
+          throw new Error("fixture did not start");
 
-          const args = commandLine.split("\0").filter(Boolean).slice(2);
-          yield* service.stop;
-          const stopped = yield* SubscriptionRef.get(service.status);
+        const commandLine = yield* fs.readFileString(
+          `/proc/${running.pid}/cmdline`,
+        );
 
-          return { running, stopped, args };
-        }),
-      ),
+        const args = commandLine.split("\0").filter(Boolean).slice(2);
+        yield* service.stop;
+        const stopped = yield* SubscriptionRef.get(service.status);
+
+        return { running, stopped, args };
+      }),
     );
 
     expect(result.running.type).toBe("running");
@@ -85,26 +86,12 @@ while :; do sleep 1; done
   });
 
   test("stops the child when its scope closes", async () => {
-    const root = await mkdtemp(join(tmpdir(), "ma-tui-sendspin-"));
-    directories.push(root);
-    const fixture = join(root, "sendspin-rs-cli");
-    await writeFile(
-      fixture,
-      `#!/bin/sh
-if [ "$1" = "--version" ]; then
-  printf 'sendspin-rs-cli 0.0.8\\n'
-  exit 0
-fi
-trap 'exit 0' TERM
-while :; do sleep 1; done
-`,
-    );
-    await chmod(fixture, 0o755);
-
     const pid = await Effect.runPromise(
       Effect.scoped(
         Effect.gen(function* () {
+          const { root, fixture } = yield* fixtureIn(helper);
           const service = yield* SendspinProcess.make(fixture, root);
+
           yield* service.start({
             serverUrl: "http://127.0.0.1:8095",
             playerId: "player-id",
@@ -118,7 +105,7 @@ while :; do sleep 1; done
 
           return status.pid;
         }),
-      ),
+      ).pipe(Effect.provide(BunServices.layer)),
     );
 
     expect(() => process.kill(pid, 0)).toThrow();

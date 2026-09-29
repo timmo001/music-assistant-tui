@@ -1,8 +1,7 @@
 import { randomUUID } from "node:crypto";
-import { chmod, mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { homedir, hostname } from "node:os";
-import { Effect, Schema } from "effect";
+import { Effect, FileSystem, Schema } from "effect";
 
 const ConfigFile = Schema.Struct({
   serverUrl: Schema.optionalKey(Schema.String),
@@ -44,108 +43,101 @@ export const configPath = (env: Readonly<Record<string, string | undefined>>) =>
     "config.json",
   );
 
-const readConfigFile = async (path: string): Promise<ConfigFile> => {
-  try {
-    return await Schema.decodeUnknownPromise(ConfigFile)(
-      JSON.parse(await readFile(path, "utf8")),
-    );
-  } catch (error) {
-    if (Schema.is(Schema.Struct({ code: Schema.Literal("ENOENT") }))(error)) {
-      return {};
-    }
+const toConfigurationError = (error: { readonly message: string }) =>
+  new ConfigurationError({ message: error.message });
 
-    throw error;
-  }
-};
+const readConfigFile = Effect.fn("Config.read")(function* (path: string) {
+  const fs = yield* FileSystem.FileSystem;
 
-const writeConfigFile = async (path: string, file: ConfigFile) => {
-  await mkdir(dirname(path), { recursive: true, mode: 0o700 });
-  await writeFile(path, `${JSON.stringify(file, null, 2)}\n`, { mode: 0o600 });
-  await chmod(path, 0o600);
-};
+  return yield* fs.readFileString(path).pipe(
+    Effect.flatMap(
+      Schema.decodeUnknownEffect(Schema.fromJsonString(ConfigFile)),
+    ),
+    Effect.catchReason("PlatformError", "NotFound", () =>
+      Effect.succeed<ConfigFile>({}),
+    ),
+  );
+}, Effect.mapError(toConfigurationError));
 
-export const saveConnectionConfig = (
+const writeConfigFile = Effect.fn("Config.write")(function* (
   path: string,
-  connection: ConnectionConfig,
-): Effect.Effect<void, ConfigurationError> =>
-  Effect.tryPromise({
-    try: async () => {
-      const file = await readConfigFile(path);
-      const { serverUrl: _serverUrl, ...rest } = file;
+  file: ConfigFile,
+) {
+  const fs = yield* FileSystem.FileSystem;
 
-      const next = await Schema.decodeUnknownPromise(ConfigFile)(
-        connection.serverUrl === undefined
-          ? { ...rest, token: connection.token }
-          : {
-              ...rest,
-              serverUrl: connection.serverUrl,
-              token: connection.token,
-            },
-      );
-
-      await writeConfigFile(path, next);
-    },
-    catch: (error) =>
-      new ConfigurationError({
-        message: error instanceof Error ? error.message : String(error),
-      }),
+  yield* fs.makeDirectory(dirname(path), { recursive: true, mode: 0o700 });
+  yield* fs.writeFileString(path, `${JSON.stringify(file, null, 2)}\n`, {
+    mode: 0o600,
   });
+  yield* fs.chmod(path, 0o600);
+}, Effect.mapError(toConfigurationError));
 
-export const savePlayerName = (
+export const saveConnectionConfig = Effect.fn("Config.saveConnection")(
+  function* (path: string, connection: ConnectionConfig) {
+    const file = yield* readConfigFile(path);
+    const { serverUrl: _serverUrl, ...rest } = file;
+
+    const next = yield* Schema.decodeEffect(ConfigFile)(
+      connection.serverUrl === undefined
+        ? { ...rest, token: connection.token }
+        : {
+            ...rest,
+            serverUrl: connection.serverUrl,
+            token: connection.token,
+          },
+    );
+
+    yield* writeConfigFile(path, next);
+  },
+  Effect.mapError(toConfigurationError),
+);
+
+export const savePlayerName = Effect.fn("Config.savePlayerName")(function* (
   path: string,
   playerName: string,
-): Effect.Effect<void, ConfigurationError> =>
-  Effect.tryPromise({
-    try: async () => {
-      const file = await readConfigFile(path);
-      await writeConfigFile(
-        path,
-        await Schema.decodeUnknownPromise(ConfigFile)({ ...file, playerName }),
-      );
-    },
-    catch: (error) =>
-      new ConfigurationError({
-        message: error instanceof Error ? error.message : String(error),
-      }),
-  });
+) {
+  const file = yield* readConfigFile(path);
+
+  yield* writeConfigFile(
+    path,
+    yield* Schema.decodeEffect(ConfigFile)({ ...file, playerName }),
+  );
+}, Effect.mapError(toConfigurationError));
 
 export const loadConfig = (
-  env: Readonly<Record<string, string | undefined>> = process.env,
-): Effect.Effect<AppConfig, ConfigurationError> =>
-  Effect.tryPromise({
-    try: async () => {
-      const path = configPath(env);
-      const file = await readConfigFile(path);
+  environment: Readonly<Record<string, string | undefined>>,
+) =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+    const path = configPath(environment);
+    const file = yield* readConfigFile(path);
 
-      if (file.token !== undefined) {
-        const metadata = await stat(path);
+    if (file.token !== undefined) {
+      const metadata = yield* fs.stat(path);
 
-        if ((metadata.mode & 0o077) !== 0) {
-          throw new Error(
-            `Configuration file containing a token must use mode 0600: ${path}`,
-          );
-        }
+      if ((metadata.mode & 0o077) !== 0) {
+        return yield* new ConfigurationError({
+          message: `Configuration file containing a token must use mode 0600: ${path}`,
+        });
       }
+    }
 
-      const sendspinPlayerId =
-        file.sendspinPlayerId ?? `music-assistant-tui-${randomUUID()}`;
+    const sendspinPlayerId =
+      file.sendspinPlayerId ?? `music-assistant-tui-${randomUUID()}`;
 
-      if (file.sendspinPlayerId === undefined) {
-        await writeConfigFile(path, { ...file, sendspinPlayerId });
-      }
+    if (file.sendspinPlayerId === undefined) {
+      yield* writeConfigFile(path, { ...file, sendspinPlayerId });
+    }
 
-      return {
-        path,
-        serverUrl: env.MUSIC_ASSISTANT_URL ?? file.serverUrl,
-        token: env.MUSIC_ASSISTANT_TOKEN ?? file.token,
-        sendspinPlayerId,
-        playerName: file.playerName ?? `${hostname()} - Music Assistant TUI`,
-        volume: file.volume ?? 30,
-        sendspinBinary: env.SENDSPIN_PLAYER_BINARY ?? file.sendspinBinary,
-      };
-    },
-    catch: (error) =>
-      new ConfigurationError({
-        message: error instanceof Error ? error.message : String(error),
-      }),
-  });
+    const config: AppConfig = {
+      path,
+      serverUrl: environment.MUSIC_ASSISTANT_URL ?? file.serverUrl,
+      token: environment.MUSIC_ASSISTANT_TOKEN ?? file.token,
+      sendspinPlayerId,
+      playerName: file.playerName ?? `${hostname()} - Music Assistant TUI`,
+      volume: file.volume ?? 30,
+      sendspinBinary: environment.SENDSPIN_PLAYER_BINARY ?? file.sendspinBinary,
+    };
+
+    return config;
+  }).pipe(Effect.mapError(toConfigurationError));
