@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "prepare": "effect-tsgo patch",
+    "prepare": "effect-tsgo patch --force=false",
     "dev": "bun run --watch src/index.ts",
     "build": "bun build src/index.ts --compile --outfile dist/music-assistant-tui",
     "typecheck": "tsc --noEmit",
@@ -24,7 +24,7 @@
     "multicast-dns": "7.2.5"
   },
   "devDependencies": {
-    "@effect/tsgo": "^0.46.0",
+    "@effect/tsgo": "^0.47.0",
     "@oxlint/plugins": "1.86.0",
     "@timmo001/oxlint-rules": "0.4.0",
     "@types/bun": "^1.4.2",
