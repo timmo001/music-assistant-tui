@@ -5,5 +5,6 @@ export default defineConfig({
   extends: [recommendedEffect],
   options: {
     typeAware: true,
+    maxWarnings: 0,
   },
 });

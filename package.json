@@ -8,7 +8,7 @@
     "dev": "bun run --watch src/index.ts",
     "build": "bun build src/index.ts --compile --outfile dist/music-assistant-tui",
     "typecheck": "tsc --noEmit",
-    "lint": "oxlint --max-warnings=0 .",
+    "lint": "oxlint .",
     "test": "bun test",
     "ci": "bun run format:check && bun run lint && bun run typecheck && bun run test && bun run build",
     "format": "prettier --write \"{src,test}/**/*.ts\" \"*.{ts,json,md}\" \".github/**/*.yml\" \".scripts/**/*.yaml\"",
