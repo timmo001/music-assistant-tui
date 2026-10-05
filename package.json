@@ -19,7 +19,7 @@
   "dependencies": {
     "@effect/platform-bun": "4.0.0",
     "@opentui/core": "^0.5.12",
-    "effect": "4.0.0",
+    "effect": "4.0.1",
     "fuse.js": "^7.5.0",
     "jimp": "1.6.1",
     "multicast-dns": "7.2.5"
