@@ -30,10 +30,9 @@ The player is the entry view. On larger terminals it shows album art using porta
 
 ```sh
 mise run check
-mise run build
 ```
 
-The standalone binary is written to `dist/music-assistant-tui`.
+`check` runs formatting, lint, types, tests and the production build in parallel. The standalone binary is written to `dist/music-assistant-tui`.
 
 ## Packages
 

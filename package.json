@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "oxlint .",
     "test": "bun test",
-    "ci": "bun run format:check && bun run lint && bun run typecheck && bun run test && bun run build",
+    "ci": "bun run --parallel --no-exit-on-error format:check lint typecheck test build",
     "format": "prettier --write \"{src,test}/**/*.ts\" \"*.{ts,json,md}\" \".github/**/*.yml\" \".scripts/**/*.yaml\"",
     "format:check": "prettier --check \"{src,test}/**/*.ts\" \"*.{ts,json,md}\" \".github/**/*.yml\" \".scripts/**/*.yaml\"",
     "check:shell": "bash -n .scripts/linux/*.sh",
