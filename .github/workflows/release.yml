@@ -33,7 +33,7 @@ jobs:
       contents: write
       id-token: write
       attestations: write
-    uses: timmo001/workflows/.github/workflows/release-bun-cli-linux.yml@f8d0daf26e163f0ee997d759fbf0f7daeb598c43 # 20261008.2
+    uses: timmo001/workflows/.github/workflows/release-bun-cli-linux.yml@2fb2fa1ffdd2f4808768bf86828482660e366a13 # 20261008.3
     with:
       binary-name: music-assistant-tui
       package-name: music-assistant-tui
@@ -82,7 +82,7 @@ jobs:
           ref: ${{ env.RELEASE_VERSION }}
 
       - name: Render PKGBUILD
-        uses: timmo001/workflows/.github/actions/prepare-arch-bin@f8d0daf26e163f0ee997d759fbf0f7daeb598c43 # 20261008.2
+        uses: timmo001/workflows/.github/actions/prepare-arch-bin@2fb2fa1ffdd2f4808768bf86828482660e366a13 # 20261008.3
         with:
           releaseVersion: ${{ env.RELEASE_VERSION }}
           packageName: music-assistant-tui
@@ -104,7 +104,7 @@ jobs:
   arch-bin:
     name: Arch package (music-assistant-tui)
     needs: prepare-arch-bin
-    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@f8d0daf26e163f0ee997d759fbf0f7daeb598c43 # 20261008.2
+    uses: timmo001/workflows/.github/workflows/build-arch-package.yml@2fb2fa1ffdd2f4808768bf86828482660e366a13 # 20261008.3
     with:
       package-name: music-assistant-tui
       package-files-artifact-name: arch-music-assistant-tui-${{ github.run_id }}-${{ github.run_attempt }}
@@ -119,7 +119,7 @@ jobs:
       contents: write
       id-token: write
       attestations: write
-    uses: timmo001/workflows/.github/workflows/attach-release-arch-package.yml@f8d0daf26e163f0ee997d759fbf0f7daeb598c43 # 20261008.2
+    uses: timmo001/workflows/.github/workflows/attach-release-arch-package.yml@2fb2fa1ffdd2f4808768bf86828482660e366a13 # 20261008.3
     with:
       artifact-name: ${{ needs.arch-bin.outputs.artifact-name }}
       release-tag: >-
@@ -129,7 +129,7 @@ jobs:
   publish-aur:
     name: Publish AUR (music-assistant-tui)
     needs: prepare-arch-bin
-    uses: timmo001/workflows/.github/workflows/publish-aur.yml@f8d0daf26e163f0ee997d759fbf0f7daeb598c43 # 20261008.2
+    uses: timmo001/workflows/.github/workflows/publish-aur.yml@2fb2fa1ffdd2f4808768bf86828482660e366a13 # 20261008.3
     with:
       package-name: music-assistant-tui
       artifact-name: arch-music-assistant-tui-${{ github.run_id }}-${{ github.run_attempt }}
