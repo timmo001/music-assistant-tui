@@ -7,7 +7,7 @@ import { runWithServices } from "./services.js";
 
 const helper = `#!/bin/sh
 if [ "$1" = "--version" ]; then
-  printf 'sendspin-rs-cli 0.0.8\\n'
+  printf 'sendspin-rs-cli 0.0.10\\n'
   exit 0
 fi
 trap 'exit 0' TERM
