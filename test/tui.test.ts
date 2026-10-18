@@ -1,6 +1,9 @@
 import { expect, test } from "bun:test";
 import { StyledText, type TextChunk } from "@opentui/core";
-import { createTestRenderer } from "@opentui/core/testing";
+import {
+  createTestRenderer,
+  type TestRendererOptions,
+} from "@opentui/core/testing";
 import { en } from "../src/i18n/en.js";
 import { buildMenu } from "../src/menu.js";
 import { DEFAULT_THEME } from "../src/theme.js";
@@ -21,9 +24,17 @@ const serverInfo = {
   has_remote_access: false,
 } as const;
 
+// The test renderer never sets up a terminal, so OpenTUI rejects title changes.
+async function createAppTestRenderer(options: TestRendererOptions) {
+  const setup = await createTestRenderer(options);
+  setup.renderer.setTerminalTitle = () => {};
+
+  return setup;
+}
+
 test("opens the menu from the player and returns", async () => {
   const { renderer, mockInput, renderOnce, captureCharFrame } =
-    await createTestRenderer({ width: 80, height: 24 });
+    await createAppTestRenderer({ width: 80, height: 24 });
 
   try {
     new App(renderer, DEFAULT_THEME, en, buildMenu(en));
@@ -41,10 +52,11 @@ test("opens the menu from the player and returns", async () => {
 });
 
 test("renders connection and audio status", async () => {
-  const { renderer, renderOnce, captureCharFrame } = await createTestRenderer({
-    width: 80,
-    height: 24,
-  });
+  const { renderer, renderOnce, captureCharFrame } =
+    await createAppTestRenderer({
+      width: 80,
+      height: 24,
+    });
 
   try {
     const app = new App(renderer, DEFAULT_THEME, en, buildMenu(en));
@@ -181,7 +193,7 @@ test("switches from wide artwork to the compact player layout", async () => {
 
 test("collects connection settings during first-run setup", async () => {
   const { renderer, mockInput, renderOnce, captureCharFrame } =
-    await createTestRenderer({ width: 80, height: 24 });
+    await createAppTestRenderer({ width: 80, height: 24 });
 
   let submitted: unknown;
 
@@ -225,7 +237,7 @@ test("collects connection settings during first-run setup", async () => {
 });
 
 test("routes Ctrl+C through graceful app shutdown", async () => {
-  const { renderer, mockInput } = await createTestRenderer({
+  const { renderer, mockInput } = await createAppTestRenderer({
     width: 80,
     height: 24,
   });
@@ -255,7 +267,7 @@ test("routes Ctrl+C through graceful app shutdown", async () => {
 
 test("changes the player name from settings", async () => {
   const { renderer, mockInput, renderOnce, captureCharFrame } =
-    await createTestRenderer({ width: 80, height: 24 });
+    await createAppTestRenderer({ width: 80, height: 24 });
 
   let playerName = "";
 
@@ -300,7 +312,7 @@ test("changes the player name from settings", async () => {
 
 test("applies consecutive volume and mute controls optimistically", async () => {
   const { renderer, mockInput, renderOnce, captureCharFrame } =
-    await createTestRenderer({ width: 80, height: 24 });
+    await createAppTestRenderer({ width: 80, height: 24 });
 
   const commands: Array<{
     command: string;

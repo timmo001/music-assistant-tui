@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@effect/platform-bun": "4.0.5",
-    "@opentui/core": "^0.5.12",
+    "@opentui/core": "^0.6.0",
     "effect": "4.0.5",
     "fuse.js": "^7.5.0",
     "jimp": "1.6.1",
