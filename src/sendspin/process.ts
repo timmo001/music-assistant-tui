@@ -13,7 +13,7 @@ import {
 } from "effect";
 import { ChildProcess, ChildProcessSpawner } from "effect/process";
 
-export const SUPPORTED_VERSION = "0.0.8";
+export const SUPPORTED_VERSION = "0.0.10";
 
 export type ProcessStatus =
   | { readonly type: "stopped" }

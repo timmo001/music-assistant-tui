@@ -49,13 +49,13 @@ description = "Download the pinned Sendspin player for the host architecture"
 run = '''
 mkdir -p dist
 case "$(uname -m)" in
-  x86_64) asset=amd64; checksum=25c21b91b6a0b87f4773f4d70bfc224176646dce49aeba0dc9f16c1f59d198c7 ;;
-  aarch64) asset=arm64; checksum=34772305890323a54506f0ec979ae1aeecc4da10bb7da47901dd799a1a737b20 ;;
+  x86_64) asset=amd64; checksum=99e683fd9f50538f5afb418faac98d6e37048ba9943ec492bf5e8b0d892789e2 ;;
+  aarch64) asset=arm64; checksum=859c62d4dd1c3734d4b191ff878d6a7cedd86aa7b9ec5c53c82bd59094db0385 ;;
   *) printf 'Unsupported architecture: %s\n' "$(uname -m)" >&2; exit 1 ;;
 esac
 curl --fail --location --silent --show-error \
   --output dist/sendspin-rs-cli \
-  "https://github.com/s3than/sendspin-rs-cli/releases/download/v0.0.8/sendspin-rs-cli-linux-$asset"
+  "https://github.com/s3than/sendspin-rs-cli/releases/download/v0.0.10/sendspin-rs-cli-linux-$asset"
 printf '%s  %s\n' "$checksum" dist/sendspin-rs-cli | sha256sum --check --strict
 chmod 0755 dist/sendspin-rs-cli
 '''
