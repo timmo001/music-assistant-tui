@@ -1,5 +1,8 @@
 # Music Assistant TUI
 
+> [!NOTE]
+> This project is on hold for now and the repository is archived. It may pick up again later.
+
 A terminal client for [Music Assistant](https://www.music-assistant.io/), built with [OpenTUI](https://github.com/anomalyco/opentui) and [Effect](https://effect.website/).
 
 It connects to the Music Assistant WebSocket API for player, queue, metadata, and control state. Synchronized local playback is provided by the pinned [`sendspin-rs-cli`](https://github.com/s3than/sendspin-rs-cli) binary and follows the system's default audio route, normally PipeWire on Linux desktops.
